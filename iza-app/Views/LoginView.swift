@@ -12,6 +12,7 @@ struct LoginView : View {
     
     @State var email: String = ""
     @State var password: String = ""
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 16){
@@ -26,16 +27,16 @@ struct LoginView : View {
             
             // Email and password fields
             Group {
-                IconTextField(text: $email, systemImageName: "envelope.fill", placeholder: "Email Address")
+                IconTextField(text: $email, systemImageName: "envelope.fill", placeholder: "Email Address", width: 360)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
-                IconSecureField(text: $password, systemImageName: "lock.fill", placeholder: "Password")
+                IconSecureField(text: $password, systemImageName: "lock.fill", placeholder: "Password", width: 360)
             }
             
             // Login Button
-            Button("Sign In") {}
-                .frame(width: 320, height: 50)
-                .background(Color.black)
+            Button("Sign In") { print("Signing in...")}
+                .frame(width: 360, height: 50)
+                .background(.black)
                 .cornerRadius(10)
                 .font(.system(size: 16, weight: .semibold, design: .monospaced))
                 .foregroundColor(.white)
@@ -44,10 +45,26 @@ struct LoginView : View {
             Button(action: {}) {
                 Text("Forgot Password?")
             }
-            .buttonStyle(.plain)
-            .foregroundColor(Color.gray)
+                .buttonStyle(.plain)
+                .foregroundColor(Color.gray)
             
-            
+            // Link na Register View
+            NavigationLink("Don't have an account? Sign up") {
+                RegisterView()
+            }
+            .foregroundColor(.purple)
+            .padding(.top, 20)
+        }
+        .navigationBarBackButtonHidden(true)
+        .navigationTitle("Sign In")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "arrow.backward")
+                        .foregroundColor(.black)
+                }
+            }
         }
     }
 }
