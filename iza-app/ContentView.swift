@@ -1,6 +1,6 @@
 import SwiftUI
 
-
+// extensions for hex color
 extension Color {
     init(hex: UInt, opacity: Double = 1){
         let red = Double((hex >> 16) & 0xFF) / 255.0
@@ -57,7 +57,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
                 
                 // Bottom part
-                VStack(spacing: 0) {
+                VStack() {
                     Spacer()
                     
                     ZStack {
@@ -67,13 +67,26 @@ struct ContentView: View {
                             .ignoresSafeArea(edges: .bottom)
                         
                         // components
-                        VStack(spacing: 16) {
+                        VStack(spacing: 12) {
+                            Spacer().frame(height: 60)
                             Button("Sign in") { }
-                                .bold()
+                                .font(.system(size: 24, weight: .bold))
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(Color.black)
+                                .foregroundColor(Color.white)
                                 .cornerRadius(10)
+        
+                            Button("Create Account") { }
+                                .font(.system(size: 24, weight: .bold))
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.white)
+                                .foregroundColor(Color.black)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.black, lineWidth: 2)
+                                )
                             
                         }
                         .padding()
@@ -83,4 +96,8 @@ struct ContentView: View {
             }
         }
     }
+}
+
+#Preview {
+    ContentView()
 }
