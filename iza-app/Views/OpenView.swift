@@ -23,7 +23,7 @@ struct RoundedCorners: Shape {
     }
 }
 
-struct ContentView: View {
+struct OpenView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -35,10 +35,10 @@ struct ContentView: View {
                 VStack {
                     HStack {
                         Text("NX")
-                            .font(.system(size: 32, weight: .bold, design: .monospaced))
+                            .font(.system(size: 40, weight: .heavy, design: .monospaced))
                             .foregroundColor(.purple)
                         Text("TRIP")
-                            .font(.system(size: 32, weight: .bold, design: .monospaced))
+                            .font(.system(size: 40, weight: .heavy, design: .monospaced))
                             .foregroundColor(.white)
                     }
                     
@@ -70,17 +70,17 @@ struct ContentView: View {
                         VStack(spacing: 12) {
                             Spacer().frame(height: 60)
                             Button("Sign in") { }
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.system(size: 20, weight: .semibold))
                                 .padding()
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: .infinity, maxHeight: 60)
                                 .background(Color.black)
                                 .foregroundColor(Color.white)
                                 .cornerRadius(10)
         
                             Button("Create Account") { }
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.system(size: 20, weight: .semibold))
                                 .padding()
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: .infinity, maxHeight: 60)
                                 .background(Color.white)
                                 .foregroundColor(Color.black)
                                 .overlay(
@@ -99,5 +99,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    OpenView()
 }

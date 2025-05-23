@@ -14,19 +14,19 @@ struct RegisterView : View {
     @State var last_name: String = ""
     @State var email: String = ""
     @State var password: String = ""
+    
     var body: some View {
         VStack(spacing: 16){
             Group {
-                TextField("First Name", text: $first_name)
-                TextField("Last Name", text: $last_name)
-                TextField("Email", text: $email)
+                HStack{
+                    IconTextField(text: $first_name, systemImageName: "person.fill", placeholder: "First Name")
+                    IconTextField(text: $last_name, systemImageName: "person.fill", placeholder: "Last Name")
+                }
+                IconTextField(text: $email, systemImageName: "envelope.fill", placeholder: "Email Address")
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
-                SecureField("Password", text: $password)
+                IconSecureField(text: $password, systemImageName: "lock.fill", placeholder: "Password")
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(10)
             
         }
     }

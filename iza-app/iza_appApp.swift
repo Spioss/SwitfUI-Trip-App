@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct iza_appApp: App {
+struct iza_appApp: App{
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            OpenView()
         }
     }
 }
