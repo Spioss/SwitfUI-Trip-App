@@ -57,8 +57,18 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func deleteAccount(){
-    
+    func deleteAccount() async{
+        guard let user = Auth.auth().currentUser else { return }
+        let uid = user.uid
+        
+        do {
+            try await Firestore.firestore().collection("users").document(uid).delete()
+            try await user.delete()
+        
+            signOut()
+        } catch {
+            print("")
+        }
     }
     
     func fetchUser() async{

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainView: View {
     @EnvironmentObject var viewModel: AuthViewModel
+    @State private var showDeleteAlert = false
     
     var body: some View {
         if let user = viewModel.currentUser {
@@ -43,13 +44,24 @@ struct MainView: View {
                         TextWithImage(imageName: "arrow.left.circle.fill", title: "Sign Out", tintColor: .red)
                     }
                     
-                    Button{
-                        print("Delete Account")
-                    } label: {
+                    Button(action: {
+                        showDeleteAlert = true
+                    }) {
                         TextWithImage(imageName: "xmark.circle.fill", title: "Delete Account", tintColor: .red)
                     }
+                    .alert("Delete Account", isPresented: $showDeleteAlert) {
+                        Button("Cancel", role: .cancel) { }
+                        Button("Delete", role: .destructive) {
+                            Task {
+                                await viewModel.deleteAccount()
+                            }
+                        }
+                    } message: {
+                        Text("Are you sure you want to delete your account? This action cannot be undone.")
+                    }
+                    
                 }
-                
+            
             }
         }
     }
