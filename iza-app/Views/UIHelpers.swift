@@ -4,6 +4,8 @@
 //
 //  Created by Lukáš Mader on 23/05/2025.
 //
+
+
 import SwiftUI
 
 struct IconTextField: View {
@@ -15,17 +17,21 @@ struct IconTextField: View {
     var body: some View {
         HStack {
             Image(systemName: systemImageName)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.adaptiveSecondaryText)
                 .frame(width: 16)
             TextField(placeholder, text: $text)
-                .foregroundColor(.primary)
+                .foregroundColor(Color.adaptivePrimaryText)
         }
         .padding(.vertical, 12)
         .padding(.leading, 16)
         .frame(width: width, height: 50)
         .frame(maxWidth: width == nil ? .infinity : nil)
-        .background(Color.black.opacity(0.05))
+        .background(Color.adaptiveInputBackground)
         .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.adaptiveBorder, lineWidth: 0.5)
+        )
     }
 }
 
@@ -38,17 +44,21 @@ struct IconSecureField: View {
     var body: some View {
         HStack {
             Image(systemName: systemImageName)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.adaptiveSecondaryText)
                 .frame(width: 16)
             SecureField(placeholder, text: $text)
-                .foregroundColor(.primary)
+                .foregroundColor(Color.adaptivePrimaryText)
         }
         .padding(.vertical, 12)
         .padding(.leading, 16)
         .frame(width: width, height: 50)
         .frame(maxWidth: width == nil ? .infinity : nil)
-        .background(Color.black.opacity(0.05))
+        .background(Color.adaptiveInputBackground)
         .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.adaptiveBorder, lineWidth: 0.5)
+        )
     }
 }
 
@@ -76,7 +86,6 @@ struct RoundedCorners: Shape {
     }
 }
 
-
 struct TextWithImage: View {
     let imageName: String
     let title: String
@@ -91,9 +100,8 @@ struct TextWithImage: View {
             
             Text(title)
                 .font(.subheadline)
-                .foregroundStyle(.black)
+                .foregroundStyle(Color.adaptivePrimaryText)
         }
-        
     }
 }
 
@@ -104,4 +112,33 @@ func getInitials(fullname: String) -> String {
         .map { String($0).uppercased() }
         .joined()
     return initials
+}
+
+// MARK: - Custom Button Styles
+struct PrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity, minHeight: 50)
+            .background(Color.adaptivePrimaryText)
+            .foregroundColor(Color.adaptiveBackground)
+            .cornerRadius(10)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+struct SecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity, minHeight: 50)
+            .background(Color.adaptiveSecondaryBackground)
+            .foregroundColor(Color.adaptivePrimaryText)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.adaptiveBorder, lineWidth: 1)
+            )
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
 }
