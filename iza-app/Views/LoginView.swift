@@ -9,9 +9,10 @@
 import SwiftUI
 
 struct LoginView : View {
-    
     @State var email: String = ""
     @State var password: String = ""
+    @EnvironmentObject var viewModel: AuthViewModel
+    
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -34,7 +35,11 @@ struct LoginView : View {
             }
             
             // Login Button
-            Button("Sign In") { print("Signing in...")}
+            Button("Sign In") {
+                Task{
+                    try await viewModel.signIn(withEmail: email, password: password)
+                }
+            }
                 .frame(width: 360, height: 50)
                 .background(.black)
                 .cornerRadius(10)

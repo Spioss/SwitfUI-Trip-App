@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct iza_appApp: App{
+    @StateObject var viewModel = AuthViewModel()
     var body: some Scene {
         WindowGroup {
             OpenView()
+                .environmentObject(viewModel)
         }
     }
 }

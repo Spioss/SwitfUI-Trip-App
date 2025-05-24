@@ -9,11 +9,11 @@ import SwiftUI
 
 
 struct RegisterView : View {
-    
     @State var first_name: String = ""
     @State var last_name: String = ""
     @State var email: String = ""
     @State var password: String = ""
+    @EnvironmentObject var viewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -40,7 +40,12 @@ struct RegisterView : View {
             }
             
             // Register Button
-            Button("Create Account") { print("Creating account...") }
+            Button("Create Account") {
+                print(first_name + " " + last_name)
+//                Task{
+//                    try await viewModel.createUser(withEmail: email, password: password, fullname: (first_name + last_name))
+//                }
+            }
                 .frame(width: 360, height: 50)
                 .background(Color.black)
                 .cornerRadius(10)
