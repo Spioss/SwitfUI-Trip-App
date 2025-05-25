@@ -8,10 +8,24 @@
 import SwiftUI
 
 struct MainView: View {
+    @StateObject private var flightViewModel = FlightViewModel()
     
     var body: some View {
-        
+        TabView {
+            FlightSearchView()
+                .environmentObject(flightViewModel)
+                .tabItem {
+                    Image(systemName: "airplane")
+                    Text("Flights")
+                }
+            
+            ProfileView()
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profil")
+                }
+        }
+        .accentColor(.purple)
     }
 }
-
 

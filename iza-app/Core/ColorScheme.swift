@@ -33,7 +33,7 @@ extension Color {
     static let errorColor = Color("ErrorColor")
     static let successColor = Color("SuccessColor")
     
-    // MARK: - Fallback colors (ak nechceš vytvárať color assets)
+    // MARK: - Fallback colors
     static let adaptiveBackground: Color = {
         Color(UIColor.systemBackground)
     }()

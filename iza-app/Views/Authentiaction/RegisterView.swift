@@ -141,7 +141,3 @@ extension RegisterView: AuthenticationForm {
             && conf_password == password
     }
 }
-
-#Preview {
-    RegisterView()
-}

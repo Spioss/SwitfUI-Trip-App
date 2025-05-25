@@ -16,9 +16,22 @@
 		80659A112DDBF09E0043EC05 /* iza-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iza-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		801B6DB12DE2A730000F5219 /* Exceptions for "iza-app" folder in "iza-app" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 80659A102DDBF09E0043EC05 /* iza-app */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		80659A132DDBF09E0043EC05 /* iza-app */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				801B6DB12DE2A730000F5219 /* Exceptions for "iza-app" folder in "iza-app" target */,
+			);
 			path = "iza-app";
 			sourceTree = "<group>";
 		};
@@ -142,6 +155,8 @@
 /* Begin XCBuildConfiguration section */
 		80659A1A2DDBF09F0043EC05 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 80659A132DDBF09E0043EC05 /* iza-app */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -261,6 +276,8 @@
 		};
 		80659A1D2DDBF09F0043EC05 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 80659A132DDBF09E0043EC05 /* iza-app */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -269,6 +286,7 @@
 				DEVELOPMENT_TEAM = Z4XQG2Q8RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iza-app/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -297,6 +315,7 @@
 				DEVELOPMENT_TEAM = Z4XQG2Q8RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iza-app/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

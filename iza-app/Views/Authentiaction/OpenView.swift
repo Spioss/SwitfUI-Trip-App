@@ -180,6 +180,3 @@ struct OpenView: View {
     }
 }
 
-#Preview {
-    OpenView()
-}
