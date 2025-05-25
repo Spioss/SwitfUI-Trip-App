@@ -39,6 +39,15 @@ struct LoginView : View {
                     IconSecureField(text: $password, systemImageName: "lock.fill", placeholder: "Password", width: 360)
                 }
                 
+                if !viewModel.errorMessage.isEmpty {
+                    Text(viewModel.errorMessage)
+                        .foregroundColor(.red)
+                        .font(.system(size: 14, weight: .medium))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .transition(.opacity.combined(with: .scale))
+                }
+                
                 // Login Button
                 Button("Sign In") {
                     Task{

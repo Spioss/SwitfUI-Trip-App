@@ -11,12 +11,19 @@ struct ContentView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     
     var body: some View {
-        Group {
-            if viewModel.userSession != nil {
-                MainView()
-            } else {
-                OpenView()
+        ZStack{
+            Group {
+                if viewModel.userSession != nil {
+                    MainView()
+                } else {
+                    OpenView()
+                }
+            }
+            
+            if viewModel.showLoadingView == true{
+                LoadingView().transition(.opacity).zIndex(1)
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.showLoadingView)
     }
 }

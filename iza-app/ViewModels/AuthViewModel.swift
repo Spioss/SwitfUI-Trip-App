@@ -14,6 +14,9 @@ import FirebaseFirestore
 class AuthViewModel: ObservableObject {
     @Published var userSession: FirebaseAuth.User?
     @Published var currentUser: User?
+    @Published var showLoadingView = false
+    @Published var errorMessage = ""
+    
     
     init(){
         self.userSession = Auth.auth().currentUser
@@ -24,17 +27,33 @@ class AuthViewModel: ObservableObject {
     }
     
     func signIn(withEmail email: String, password: String) async throws{
+        showLoadingView = true
+        errorMessage = ""
         
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.userSession = result.user
             await fetchUser()
-        } catch {
-            print("DEBUG: Faile to login with error: \(error.localizedDescription)")
+        } catch let error as NSError{
+            switch AuthErrorCode(rawValue: error.code) {
+                case .invalidEmail:
+                    errorMessage = "Invalid Mail"
+                case .tooManyRequests:
+                    errorMessage = "Too many attempts, please try again later"
+                case .networkError:
+                    errorMessage = "Network Error"
+                default:
+                    errorMessage = "Password or Email is incorrect."
+                }
         }
+        
+        showLoadingView = false 
     }
     
     func createUser(withEmail email: String, password: String, fullname: String) async throws{
+        showLoadingView = true
+        errorMessage = ""
+        
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
@@ -42,9 +61,20 @@ class AuthViewModel: ObservableObject {
             let encodedUser = try Firestore.Encoder().encode(user)
             try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
             await fetchUser() // wait for fetch of data to our Model
-        } catch {
-            print("DEBUG: Failed to create user: \(error.localizedDescription)")
+        } catch let error as NSError{
+            switch AuthErrorCode(rawValue: error.code) {
+                case .invalidEmail:
+                    errorMessage = "Invalid Mail"
+                case .tooManyRequests:
+                    errorMessage = "Too many attempts, please try again later"
+                case .networkError:
+                    errorMessage = "Network Error"
+                default:
+                    errorMessage = "Incorrect email, password or fullname."
+                }
         }
+        
+        showLoadingView = false
     }
     
     func signOut(){

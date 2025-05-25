@@ -88,6 +88,14 @@ struct RegisterView : View {
                         }
                     }
                 }
+                if !viewModel.errorMessage.isEmpty {
+                    Text(viewModel.errorMessage)
+                        .foregroundColor(.red)
+                        .font(.system(size: 14, weight: .medium))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .transition(.opacity.combined(with: .scale))
+                }
                 
                 // Register Button
                 Button("Create Account") {
@@ -115,6 +123,7 @@ struct RegisterView : View {
                 .foregroundColor(.purple)
                 .padding(.top, 20)
             }
+            .animation(.easeInOut(duration: 0.3), value: viewModel.errorMessage.isEmpty)
         }
         .navigationBarBackButtonHidden(true)
         .navigationTitle("Create Account")
