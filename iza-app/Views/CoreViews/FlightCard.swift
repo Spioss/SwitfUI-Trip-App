@@ -4,6 +4,7 @@
 //
 //  Created by Lukáš Mader on 25/05/2025.
 //
+
 import SwiftUI
 
 struct FlightCard: View {
@@ -12,27 +13,22 @@ struct FlightCard: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header s dátumom a cenou
+            // Header with prie
             HStack {
-                VStack(alignment: .leading) {
-                    Text(formatFlightDate(flight.outbound.firstSegment.departure.at))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Text(viewModel.formatPrice(flight.totalPrice, currency: flight.currency))
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.purple)
-                }
+                Text(viewModel.formatPrice(flight.totalPrice, currency: flight.currency))
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.purple)
+                
                 
                 Spacer()
                 
-                // Airline logo placeholder alebo kód
                 Text(flight.outbound.firstSegment.carrierCode)
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .frame(width: 40, height: 40)
-                    .background(Color.red) // Simuluje logo aerolínky
+                    .background(Color.red)
                     .clipShape(Circle())
             }
             .padding(.horizontal, 20)
@@ -48,11 +44,15 @@ struct FlightCard: View {
                     Text(getCityName(flight.outbound.firstSegment.departure.iataCode))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text(viewModel.formatTime(flight.outbound.firstSegment.departure.at))
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                    VStack(alignment: .leading, spacing: 0){
+                        Text(formatFlightDate(flight.outbound.firstSegment.departure.at))
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text(viewModel.formatTime(flight.outbound.firstSegment.departure.at))
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                    }
                 }
-                
                 Spacer()
                 
                 // Flight path with duration
@@ -89,9 +89,14 @@ struct FlightCard: View {
                     Text(getCityName(flight.outbound.lastSegment.arrival.iataCode))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text(viewModel.formatTime(flight.outbound.lastSegment.arrival.at))
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                    VStack(alignment: .trailing, spacing: 0){
+                        Text(formatFlightDate(flight.outbound.lastSegment.arrival.at))
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text(viewModel.formatTime(flight.outbound.lastSegment.arrival.at))
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                    }
                 }
             }
             .padding(.horizontal, 20)
@@ -111,9 +116,14 @@ struct FlightCard: View {
                         Text(getCityName(returnFlight.firstSegment.departure.iataCode))
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        Text(viewModel.formatTime(returnFlight.firstSegment.departure.at))
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                        VStack(alignment: .leading, spacing: 0){
+                            Text(formatFlightDate(returnFlight.firstSegment.departure.at))
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            Text(viewModel.formatTime(returnFlight.firstSegment.departure.at))
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
                     }
                     
                     Spacer()
@@ -124,7 +134,6 @@ struct FlightCard: View {
                             Image(systemName: "airplane")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                                .rotationEffect(.degrees(180))
                             
                             if !returnFlight.isDirectFlight {
                                 Circle()
@@ -153,9 +162,14 @@ struct FlightCard: View {
                         Text(getCityName(returnFlight.lastSegment.arrival.iataCode))
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        Text(viewModel.formatTime(returnFlight.lastSegment.arrival.at))
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                        VStack(alignment: .trailing, spacing: 0){
+                            Text(formatFlightDate(returnFlight.lastSegment.arrival.at))
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            Text(viewModel.formatTime(returnFlight.lastSegment.arrival.at))
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -197,41 +211,57 @@ struct FlightCard: View {
         )
     }
     
-    // Helper funkcie
+    // MARK: - Helper funkcie
+    
     private func formatFlightDate(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else { return "" }
+        // Jednoduchšie parsovanie dátumu
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        
+        guard let date = inputFormatter.date(from: isoString) else {
+            // Regex fallback pre dátum
+            if let dateMatch = isoString.range(of: #"(\d{4}-\d{2}-\d{2})"#, options: .regularExpression) {
+                let dateString = String(isoString[dateMatch])
+                // Prekonvertujeme na čitateľnejší formát
+                let parts = dateString.split(separator: "-")
+                if parts.count == 3 {
+                    return "\(parts[2]).\(parts[1])."
+                }
+            }
+            return isoString
+        }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd MMM"
-        dateFormatter.locale = Locale(identifier: "sk_SK")
+        dateFormatter.locale = Locale(identifier: "en_US")
         return dateFormatter.string(from: date)
     }
     
     private func getCityName(_ iataCode: String) -> String {
-        // Môžeš pridať mapping pre najčastejšie letiská
+        // Rozšírený mapping pre najčastejšie letiská
         let airportNames = [
             "BTS": "Bratislava",
             "VIE": "Vienna",
-            "PRG": "Prague", 
+            "PRG": "Prague",
             "LHR": "London",
+            "LGW": "London",
+            "STN": "London",
             "CDG": "Paris",
+            "ORY": "Paris",
             "FRA": "Frankfurt",
             "MUC": "Munich",
             "FCO": "Rome",
+            "MXP": "Milan",
             "MAD": "Madrid",
             "BCN": "Barcelona",
             "AMS": "Amsterdam",
             "ZUR": "Zurich",
             "GVA": "Geneva",
-            "MXP": "Milan",
             "DUB": "Dublin",
-            "LGW": "London",
-            "STN": "London",
-            "ORY": "Paris",
             "CGN": "Cologne",
             "HAM": "Hamburg",
             "TXL": "Berlin",
+            "BER": "Berlin",
             "WAW": "Warsaw",
             "KRK": "Krakow",
             "BUD": "Budapest",
@@ -243,7 +273,14 @@ struct FlightCard: View {
             "JFK": "New York",
             "LAX": "Los Angeles",
             "DXB": "Dubai",
-            // Pridaj ďalšie podľa potreby
+            "DOH": "Doha",
+            "SIN": "Singapore",
+            "NRT": "Tokyo",
+            "HND": "Tokyo",
+            "ICN": "Seoul",
+            "PEK": "Beijing",
+            "SYD": "Sydney",
+            "MEL": "Melbourne"
         ]
         
         return airportNames[iataCode] ?? iataCode

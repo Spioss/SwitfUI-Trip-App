@@ -11,7 +11,7 @@ import Foundation
 class AmadeusService: ObservableObject {
     static let shared = AmadeusService()
     
-
+    
     private let baseURL = "https://test.api.amadeus.com"
     
     private var accessToken: String?
@@ -21,9 +21,7 @@ class AmadeusService: ObservableObject {
     
     // Authetication
     private func getToken() async throws -> String {
-        if let token = accessToken,
-           let expiry = tokenExpiry,
-           expiry > Date() {
+        if let token = accessToken, let expiry = tokenExpiry, expiry > Date() {
             return token
         }
         
@@ -52,7 +50,8 @@ class AmadeusService: ObservableObject {
         components.queryItems = [
             URLQueryItem(name: "subType", value: "AIRPORT"),
             URLQueryItem(name: "keyword", value: keyword),
-            URLQueryItem(name: "page[limit]", value: "10")
+            URLQueryItem(name: "page[limit]", value: "10"),
+            URLQueryItem(name: "sort", value: "analytics.travelers.score")
         ]
         
         var request = URLRequest(url: components.url!)
