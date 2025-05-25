@@ -23,13 +23,13 @@ struct AirportPickerView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Search bar s vylepšeniami
+                // Search bar
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.secondary)
                         
-                        TextField("Hľadaj letisko, mesto alebo kód...", text: $searchText)
+                        TextField("Search by airport, city or code...", text: $searchText)
                             .textFieldStyle(.plain)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
@@ -60,23 +60,20 @@ struct AirportPickerView: View {
                 
                 // Suggestions or results
                 if searchText.isEmpty {
-                    // Populárne letiská ak nie je zadané vyhľadávanie
                     popularAirportsSection
                 } else if viewModel.airports.isEmpty && !viewModel.searchStatus.contains("Searching") {
-                    // Žiadne výsledky
                     noResultsView
                 } else {
-                    // Zoznam nájdených letísk
                     airportsList
                 }
                 
                 Spacer()
             }
-            .navigationTitle(isSelectingDeparture ? "Odkiaľ letíte?" : "Kam letíte?")
+            .navigationTitle(isSelectingDeparture ? "Where are you flying from?" : "Where are you flying?")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Zrušiť") {
+                    Button("Cancle") {
                         dismiss()
                     }
                 }
@@ -98,7 +95,7 @@ struct AirportPickerView: View {
     
     private var popularAirportsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Populárne destinácie")
+            Text("Popular destinations")
                 .font(.headline)
                 .padding(.horizontal)
             
@@ -106,7 +103,6 @@ struct AirportPickerView: View {
                 LazyVStack(spacing: 8) {
                     ForEach(getPopularAirportCodes(), id: \.self) { code in
                         Button {
-                            // Pre populárne letiská vytvoríme mock objekt
                             selectedAirport = createMockAirport(iataCode: code)
                             dismiss()
                         } label: {
@@ -146,23 +142,23 @@ struct AirportPickerView: View {
                 .foregroundColor(.secondary.opacity(0.5))
             
             VStack(spacing: 8) {
-                Text("Žiadne letiská nenájdené")
+                Text("No airports found")
                     .font(.headline)
                 
-                Text("Skúste hľadať podľa:")
+                Text("Try searching by:")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("• Názvu mesta (napr. 'London')")
-                    Text("• Názvu letiska (napr. 'Heathrow')")
-                    Text("• IATA kódu (napr. 'LHR')")
+                    Text("• City name (e.g. 'London')")
+                    Text("• Airport name (e.g. 'Heathrow')")
+                    Text("• IATA code (e.g. 'LHR')")
                 }
                 .font(.caption)
                 .foregroundColor(.secondary)
             }
             
-            Button("Vyskúšať populárne letiská") {
+            Button("Check out popular airports") {
                 searchText = ""
             }
             .buttonStyle(.bordered)
@@ -212,10 +208,10 @@ struct AirportPickerView: View {
         .listStyle(.plain)
     }
     
-    // MARK: - Helper Functions
+    // MARK: - Helper Functions mostly for Popular Airports
     
     private func getPopularAirportCodes() -> [String] {
-        return ["BTS", "VIE", "PRG", "LHR", "CDG", "FRA", "MUC", "FCO", "MAD", "BCN"]
+        return ["PRG", "VIE", "BTS", "LHR", "CDG", "FRA", "MUC", "FCO", "MAD", "BCN"]
     }
     
     private func createMockAirport(iataCode: String) -> SimpleAirport {

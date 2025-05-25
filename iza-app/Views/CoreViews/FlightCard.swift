@@ -176,7 +176,7 @@ struct FlightCard: View {
                 .padding(.vertical, 16)
             }
             
-            // Bottom section s dodatočnými info
+            // Bottom section
             if !flight.outbound.isDirectFlight || (flight.inbound != nil && !flight.inbound!.isDirectFlight) {
                 VStack(spacing: 4) {
                     Divider()
@@ -184,16 +184,16 @@ struct FlightCard: View {
                     
                     HStack {
                         if !flight.outbound.isDirectFlight {
-                            Label("\(flight.outbound.numberOfStops) prestup", systemImage: "arrow.triangle.swap")
-                                .font(.caption)
+                            Label("\(flight.outbound.numberOfStops) transfer", systemImage: "arrow.triangle.swap")
+                                .font(.system(size: 12))
                                 .foregroundColor(.orange)
                         }
                         
                         Spacer()
                         
                         if let returnFlight = flight.inbound, !returnFlight.isDirectFlight {
-                            Label("\(returnFlight.numberOfStops) prestup", systemImage: "arrow.triangle.swap")
-                                .font(.caption)
+                            Label("\(returnFlight.numberOfStops) transfer", systemImage: "arrow.triangle.swap")
+                                .font(.system(size: 12))
                                 .foregroundColor(.orange)
                         }
                     }
@@ -204,25 +204,23 @@ struct FlightCard: View {
         }
         .background(Color.adaptiveInputBackground)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.secondary.opacity(0.1), lineWidth: 1)
         )
     }
     
-    // MARK: - Helper funkcie
+    // MARK: - Helper functions
     
     private func formatFlightDate(_ isoString: String) -> String {
-        // Jednoduchšie parsovanie dátumu
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         
         guard let date = inputFormatter.date(from: isoString) else {
-            // Regex fallback pre dátum
+            // Regex fallback
             if let dateMatch = isoString.range(of: #"(\d{4}-\d{2}-\d{2})"#, options: .regularExpression) {
                 let dateString = String(isoString[dateMatch])
-                // Prekonvertujeme na čitateľnejší formát
                 let parts = dateString.split(separator: "-")
                 if parts.count == 3 {
                     return "\(parts[2]).\(parts[1])."
@@ -238,7 +236,7 @@ struct FlightCard: View {
     }
     
     private func getCityName(_ iataCode: String) -> String {
-        // Rozšírený mapping pre najčastejšie letiská
+        // Most common airports, for some reason AmedeusAPI doesnt show most of these airport, idk why
         let airportNames = [
             "BTS": "Bratislava",
             "VIE": "Vienna",
