@@ -23,6 +23,7 @@ class FlightViewModel: ObservableObject {
     @Published var returnDate = Date().addingTimeInterval(7*24*3600)
     @Published var isRoundTrip = false
     @Published var adults = 1
+    @Published var kids = 1
     
     private let service = AmadeusService.shared
     
@@ -79,7 +80,8 @@ class FlightViewModel: ObservableObject {
             to: to,
             departureDate: formatDate(departureDate),
             returnDate: isRoundTrip ? formatDate(returnDate) : nil,
-            adults: adults
+            adults: adults,
+            kids: kids
         )
     
         

@@ -37,7 +37,7 @@ class AmadeusService: ObservableObject {
         let tokenResponse = try JSONDecoder().decode(AmadeusToken.self, from: data)
         
         self.accessToken = tokenResponse.accessToken
-        self.tokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 60)) // 1 minúta pred expirovaním
+        self.tokenExpiry = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 60))
         
         return tokenResponse.accessToken
     }
@@ -73,7 +73,7 @@ class AmadeusService: ObservableObject {
             URLQueryItem(name: "destinationLocationCode", value: request.to),
             URLQueryItem(name: "departureDate", value: request.departureDate),
             URLQueryItem(name: "adults", value: String(request.adults)),
-            URLQueryItem(name: "max", value: "10") // Maximálne 10 výsledkov
+            URLQueryItem(name: "max", value: "10")
         ]
         
         if let returnDate = request.returnDate {
@@ -100,9 +100,9 @@ enum FlightError: Error {
     
     var localizedDescription: String {
         switch self {
-        case .noToken: return "Problém s autentifikáciou"
-        case .invalidResponse: return "Neplatná odpoveď zo servera"
-        case .networkError: return "Problém so sieťou"
+        case .noToken: return "Auth Problem"
+        case .invalidResponse: return "Invalid response from the server"
+        case .networkError: return "Network problem"
         }
     }
 }

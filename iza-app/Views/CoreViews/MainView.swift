@@ -19,6 +19,12 @@ struct MainView: View {
                     Text("Flights")
                 }
             
+            TicketsView()
+                .tabItem {
+                    Image(systemName: "text.book.closed.fill")
+                    Text("Booked tickets")
+                }
+                
             ProfileView()
                 .tabItem {
                     Image(systemName: "person.fill")

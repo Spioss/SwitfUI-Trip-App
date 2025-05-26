@@ -5,13 +5,15 @@
 //  Created by Lukáš Mader on 25/05/2025.
 //
 
-
 import SwiftUI
 
 struct FlightSearchView: View {
     @EnvironmentObject var viewModel: FlightViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showAirportPicker = false
     @State private var pickingDeparture = true
+    @State private var showBookingView = false
+    @State private var selectedFlight: SimpleFlight?
     
     var body: some View {
         NavigationView {
@@ -23,7 +25,7 @@ struct FlightSearchView: View {
                     // search button
                     searchButton
                     
-                    // Chybová správa
+                    // error
                     if !viewModel.errorMessage.isEmpty {
                         Text(viewModel.errorMessage)
                             .foregroundColor(.red)
@@ -36,12 +38,12 @@ struct FlightSearchView: View {
                             .padding()
                     }
                     
-                    // Výsledky s novou kartou
+                    // flight cards
                     LazyVStack(spacing: 16) {
                         ForEach(viewModel.flights) { flight in
                             Button(action: {
-                                print("Choosed flight: \(flight.id)")
-                                // Tu môžeš pridať navigáciu na detail letu alebo booking
+                                selectedFlight = flight
+                                showBookingView = true
                             }) {
                                 FlightCard(flight: flight)
                                     .environmentObject(viewModel)
@@ -53,7 +55,6 @@ struct FlightSearchView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("NxTrip")
             .sheet(isPresented: $showAirportPicker) {
                 AirportPickerView(
                     isSelectingDeparture: $pickingDeparture,
@@ -61,15 +62,21 @@ struct FlightSearchView: View {
                 )
                 .environmentObject(viewModel)
             }
+            .sheet(item: $selectedFlight) { flight in
+                BookingView(flight: flight)
+                    .environmentObject(authViewModel)
+                    .environmentObject(viewModel)
+            }
         }
     }
     
     // Forms
     private var searchForm: some View {
         VStack(spacing: 16) {
-            // Letiská
+            
+            // Airports
             HStack(spacing: 12) {
-                // Odkiaľ
+                // FROM
                 Button {
                     pickingDeparture = true
                     showAirportPicker = true
@@ -86,7 +93,7 @@ struct FlightSearchView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                    .background(Color.adaptiveInputBackground)
+                    .background(Color.adaptiveSecondaryBackground)
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
@@ -117,7 +124,7 @@ struct FlightSearchView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                    .background(Color.adaptiveInputBackground)
+                    .background(Color.adaptiveSecondaryBackground)
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
@@ -140,16 +147,24 @@ struct FlightSearchView: View {
                         .datePickerStyle(.compact)
                 }
             }
+            .padding()
+            .background(Color.adaptiveSecondaryBackground)
+            .cornerRadius(12)
             
             // Number of passangers
-            HStack {
-                Text("Adults:")
-                Spacer()
-                Text("\(viewModel.adults)")
-                Stepper("", value: $viewModel.adults, in: 1...9)
-                    .labelsHidden()
+            VStack{
+                CustomStepper (
+                    title: "Adults:",
+                    value: $viewModel.adults,
+                    range: 1...9
+                )
+                CustomStepper (
+                    title: "Kids:",
+                    value: $viewModel.kids,
+                    range: 1...9
+                )
             }
-            .background(Color.adaptiveInputBackground)
+            .background(Color.adaptiveSecondaryBackground)
             .cornerRadius(12)
             
         }
@@ -165,13 +180,8 @@ struct FlightSearchView: View {
         .frame(width: 360, height: 50)
         .background(viewModel.fromAirport != nil && viewModel.toAirport != nil ? Color.purple : Color.adaptivePrimaryText)
         .cornerRadius(10)
-        .font(.system(size: 16, weight: .semibold, design: .monospaced))
+        .font(.system(size: 16, weight: .semibold))
         .foregroundColor(Color.adaptiveBackground)
         .disabled(viewModel.fromAirport == nil || viewModel.toAirport == nil)
     }
 }
-
-//#Preview {
-//    FlightSearchView()
-//        .environmentObject(FlightViewModel())
-//}

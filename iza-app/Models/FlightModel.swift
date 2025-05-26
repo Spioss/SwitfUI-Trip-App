@@ -1,5 +1,5 @@
 //
-//  FlightModels.swift
+//  FlightModel.swift
 //  iza-app
 //
 //  Created by Lukáš Mader on 25/05/2025.
@@ -13,8 +13,9 @@ struct FlightSearchRequest {
     let from: String        // "BTS"
     let to: String         // "LHR"
     let departureDate: String  // "2025-06-15"
-    let returnDate: String?    // nil pre jednosmerný
+    let returnDate: String?    // nil for direct
     let adults: Int        // 1
+    let kids: Int 
 }
 
 struct FlightSearchResponse: Codable {

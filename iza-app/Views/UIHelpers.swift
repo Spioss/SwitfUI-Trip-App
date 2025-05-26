@@ -142,3 +142,64 @@ struct SecondaryButtonStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
+
+private func getInitials(from fullName: String) -> String {
+    let nameParts = fullName.split(separator: " ")
+    let initials = nameParts.compactMap { $0.first }.map { String($0).uppercased() }
+    return initials.joined()
+}
+
+
+struct CustomStepper: View {
+    let title: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+            
+            Spacer()
+            
+            HStack(spacing: 12) {
+                Button(action: {
+                    if value > range.lowerBound {
+                        value -= 1
+                    }
+                }) {
+                    Image(systemName: "minus")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 28, height: 28)
+                        .background(value > range.lowerBound ? Color.purple : Color.gray)
+                        .cornerRadius(6)
+                }
+                .disabled(value <= range.lowerBound)
+                
+                Text("\(value)")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .frame(minWidth: 24)
+                
+                Button(action: {
+                    if value < range.upperBound {
+                        value += 1
+                    }
+                }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 28, height: 28)
+                        .background(value < range.upperBound ? Color.purple : Color.gray)
+                        .cornerRadius(6)
+                }
+                .disabled(value >= range.upperBound)
+            }
+        }
+        .padding()
+        .background(Color.adaptiveSecondaryBackground)
+        .cornerRadius(12)
+    }
+}
