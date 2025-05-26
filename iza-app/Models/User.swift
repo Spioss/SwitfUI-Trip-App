@@ -11,6 +11,7 @@ struct User: Identifiable, Codable {
     let id: String
     let fullname: String
     let email: String
+    let phone: String?
     
     var initials: String {
         let formatter = PersonNameComponentsFormatter()
@@ -22,4 +23,11 @@ struct User: Identifiable, Codable {
         return ""
     }
     
+    var hasPhone: Bool {
+        return phone != nil && !phone!.isEmpty
+    }
+        
+    var displayPhone: String {
+        return phone ?? "Not provided"
+    }
 }

@@ -57,7 +57,7 @@ class AuthViewModel: ObservableObject {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
-            let user = User(id: result.user.uid, fullname: fullname, email: email) // our model currentUser
+            let user = User(id: result.user.uid, fullname: fullname, email: email, phone: nil) // our model currentUser
             let encodedUser = try Firestore.Encoder().encode(user)
             try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
             await fetchUser() // wait for fetch of data to our Model
@@ -106,5 +106,59 @@ class AuthViewModel: ObservableObject {
         
         guard let snapshot = try? await Firestore.firestore().collection("users").document(uid).getDocument() else { return }
         self.currentUser = try? snapshot.data(as: User.self)
+    }
+    
+    func updateUserProfile(fullname: String?, phone: String?) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
+        }
+        
+        errorMessage = ""
+        
+        do {
+            var updateData: [String: Any] = [:]
+            
+            // Update fullname if provided
+            if let fullname = fullname {
+                updateData["fullname"] = fullname
+            }
+            
+            // Update phone if provided (can be nil to remove)
+            if phone != nil {
+                updateData["phone"] = phone
+            }
+            
+            // Update in Firestore
+            try await Firestore.firestore().collection("users").document(uid).updateData(updateData)
+            
+            // Update local currentUser
+            if let currentUser = self.currentUser {
+                self.currentUser = User(
+                    id: currentUser.id,
+                    fullname: fullname ?? currentUser.fullname,
+                    email: currentUser.email,
+                    phone: phone ?? currentUser.phone
+                )
+            }
+            
+        } catch {
+            errorMessage = "Failed to update profile: \(error.localizedDescription)"
+            throw error
+        }
+    }
+}
+
+
+extension AuthViewModel {
+    func prefillBookingData() -> (fullname: String, email: String, phone: String) {
+        guard let user = currentUser else {
+            return ("", "", "")
+        }
+        
+        return (
+            fullname: user.fullname,
+            email: user.email,
+            phone: user.phone ?? ""
+        )
     }
 }

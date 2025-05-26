@@ -529,7 +529,11 @@ struct BookingView: View {
     
     private func prefillUserData() {
         guard let user = authViewModel.currentUser else { return }
-        bookingViewModel.prefillUserData(fullname: user.fullname, email: user.email)
+        bookingViewModel.prefillUserData(
+            fullname: user.fullname,
+            email: user.email,
+            phone: user.phone ?? ""
+        )
     }
     
     private func formatFlightDate(_ isoString: String) -> String {

@@ -133,16 +133,26 @@ class BookingViewModel: ObservableObject {
     }
     
     // Auto-fill user data
-    func prefillUserData(fullname: String, email: String) {
-        let nameParts = fullname.split(separator: " ")
-        if nameParts.count >= 2 {
-            firstName = String(nameParts[0])
-            lastName = nameParts.dropFirst().joined(separator: " ")
-        } else if nameParts.count == 1 {
-            firstName = String(nameParts[0])
+    func prefillUserData(fullname: String, email: String, phone: String = "") {
+        // Predvyplň len ak sú polia prázdne
+        if firstName.isEmpty {
+            let nameParts = fullname.split(separator: " ")
+            if nameParts.count >= 2 {
+                firstName = String(nameParts[0])
+                lastName = nameParts.dropFirst().joined(separator: " ")
+            } else if nameParts.count == 1 {
+                firstName = String(nameParts[0])
+            }
         }
         
-        self.email = email
+        if self.email.isEmpty {
+            self.email = email
+        }
+        
+        // Predvyplň telefón ak je k dispozícii
+        if self.phone.isEmpty && !phone.isEmpty {
+            self.phone = phone
+        }
     }
     
     // MARK: - Card Formatting
