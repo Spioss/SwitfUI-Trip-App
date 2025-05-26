@@ -133,8 +133,7 @@ class BookingViewModel: ObservableObject {
     }
     
     // Auto-fill user data
-    func prefillUserData(fullname: String, email: String, phone: String = "") {
-        // Predvyplň len ak sú polia prázdne
+    func prefillUserData(fullname: String, email: String, phone: String = "", defaultCard: SavedCreditCard? = nil) {
         if firstName.isEmpty {
             let nameParts = fullname.split(separator: " ")
             if nameParts.count >= 2 {
@@ -149,9 +148,22 @@ class BookingViewModel: ObservableObject {
             self.email = email
         }
         
-        // Predvyplň telefón ak je k dispozícii
+        // Phone number if exists
         if self.phone.isEmpty && !phone.isEmpty {
             self.phone = phone
+        }
+        
+        // default card if exists
+        if let card = defaultCard {
+            if cardHolderName.isEmpty {
+                cardHolderName = card.cardHolderName
+            }
+            if cardNumber.isEmpty {
+                selectedCardType = card.cardType
+            }
+            if expiryDate.isEmpty {
+                expiryDate = card.expiryDate
+            }
         }
     }
     

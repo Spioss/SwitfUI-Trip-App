@@ -12,6 +12,7 @@ struct User: Identifiable, Codable {
     let fullname: String
     let email: String
     let phone: String?
+    let savedCards: [SavedCreditCard]
     
     var initials: String {
         let formatter = PersonNameComponentsFormatter()
@@ -29,5 +30,17 @@ struct User: Identifiable, Codable {
         
     var displayPhone: String {
         return phone ?? "Not provided"
+    }
+    
+    var defaultCard: SavedCreditCard? {
+        return savedCards.first { $0.isDefault } ?? savedCards.first
+    }
+        
+    var hasCards: Bool {
+        return !savedCards.isEmpty
+    }
+        
+    var canAddMoreCards: Bool {
+        return savedCards.count < 3
     }
 }

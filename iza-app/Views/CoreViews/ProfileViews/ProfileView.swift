@@ -1,8 +1,8 @@
 //
-//  ProfileView.swift (Clean Phone Section)
+//  ProfileView.swift
 //  iza-app
 //
-//  Created by Lukáš Mader on 25/05/2025.
+//  Created by Lukáš Mader on 26/05/2025.
 //
 
 import SwiftUI
@@ -12,6 +12,9 @@ struct ProfileView: View {
     @State private var showDeleteAlert = false
     @State private var showRenameAlert = false
     @State private var showPhoneAlert = false
+    @State private var showAddCardView = false
+    @State private var showCardDetail = false
+    @State private var selectedCard: SavedCreditCard?
     @State private var newFullName = ""
     @State private var newPhoneNumber = ""
     
@@ -41,9 +44,17 @@ struct ProfileView: View {
                     }
                 }
                 
-                Section("Personal Informations") {
+                Section("Personal Information") {
+                    // Name row
+                    HStack {
+                        TextWithImage(imageName: "person.fill", title: "Name", tintColor: .blue)
+                        Spacer()
+                        Text(user.fullname)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
                     
-                    // Phone
+                    // Phone row
                     HStack {
                         TextWithImage(imageName: "phone.fill", title: "Phone", tintColor: .green)
                         Spacer()
@@ -52,7 +63,14 @@ struct ProfileView: View {
                             .foregroundColor(user.hasPhone ? .secondary : .orange)
                     }
                     
-                    // Phone Edit button
+                    // Edit buttons
+                    Button{
+                        newFullName = user.fullname
+                        showRenameAlert = true
+                    } label: {
+                        TextWithImage(imageName: "pencil.circle.fill", title: "Change Name", tintColor: .blue)
+                    }
+                    
                     Button{
                         newPhoneNumber = user.phone ?? ""
                         showPhoneAlert = true
@@ -63,19 +81,83 @@ struct ProfileView: View {
                             tintColor: user.hasPhone ? .green : .orange
                         )
                     }
-                    
-                    // Name edit button
-                    Button{
-                        newFullName = user.fullname
-                        showRenameAlert = true
-                    } label: {
-                        TextWithImage(imageName: "pencil.circle.fill", title: "Change Name", tintColor: .blue)
-                    }
-                    
-                    
                 }
                 
-                Section("Account"){
+                Section("Payment Methods") {
+                    if user.hasCards {
+                        ForEach(user.savedCards) { card in
+                            Button{
+                                selectedCard = card
+                                showCardDetail = true
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: card.cardType.icon)
+                                                .font(.system(size: 16))
+                                                .foregroundColor(.purple)
+                                            
+                                            Text(card.displayName)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.primary)
+                                            
+                                            if card.isDefault {
+                                                Text("DEFAULT")
+                                                    .font(.caption2)
+                                                    .fontWeight(.bold)
+                                                    .foregroundColor(.white)
+                                                    .padding(.horizontal, 6)
+                                                    .padding(.vertical, 2)
+                                                    .background(Color.purple)
+                                                    .cornerRadius(4)
+                                            }
+                                        }
+                                        
+                                        HStack(spacing: 12) {
+                                            Text(card.maskedNumber)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                            
+                                            Text("Expires \(card.expiryDate)")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        HStack {
+                            TextWithImage(imageName: "creditcard.fill", title: "Credit Cards", tintColor: .purple)
+                            Spacer()
+                            Text("No cards saved")
+                                .font(.subheadline)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                    
+                    // Add card button
+                    Button{
+                        showAddCardView = true
+                    } label: {
+                        TextWithImage(
+                            imageName: user.canAddMoreCards ? "creditcard.and.123" : "creditcard.trianglebadge.exclamationmark",
+                            title: user.canAddMoreCards ? "Add Credit Card" : "Maximum 3 cards",
+                            tintColor: user.canAddMoreCards ? .purple : .gray
+                        )
+                    }
+                    .disabled(!user.canAddMoreCards)
+                }
+                
+                Section("Account") {
                     Button{
                         viewModel.signOut()
                     } label: {
@@ -97,6 +179,17 @@ struct ProfileView: View {
                     } message: {
                         Text("Are you sure you want to delete your account? This action cannot be undone.")
                     }
+                }
+                
+            }
+            .sheet(isPresented: $showAddCardView) {
+                AddCardView()
+                    .environmentObject(viewModel)
+            }
+            .sheet(isPresented: $showCardDetail) {
+                if let card = selectedCard {
+                    CardDetailView(card: card)
+                        .environmentObject(viewModel)
                 }
             }
             .alert("Change Name", isPresented: $showRenameAlert) {
@@ -128,7 +221,7 @@ struct ProfileView: View {
                 if user.hasPhone {
                     Button("Remove", role: .destructive) {
                         Task {
-                            await updatePhoneNumber(phone: "")
+                            await updatePhoneNumber(phone: nil)
                         }
                     }
                 }
