@@ -292,4 +292,11 @@ iza-app/
 | ![Sign In](assets/signin.png) | ![Airport Selection](assets/airport-picker.png) | ![Ticket Details](assets/ticket-details.png) |
 | ![Registration](assets/register.png) | ![Profile](assets/profile.png) | ![Dark Mode](assets/dark-mode.png) |
 
+#### Booking Flow
+| Booking Steps |  |
+|---------------------|---------------|
+| ![Booking 1](assets/booking-1.png) | ![Booking 2](assets/booking-2.png) |
+| ![Booking 3](assets/booking-3.png) | ![Booking 4](assets/booking-4.png) |
+| ![Booking 3](assets/booking-5.png) | ![Booking Succes](assets/booking-success.png) |
+
 *Note: The app supports both light and dark mode themes for optimal user experience.*
