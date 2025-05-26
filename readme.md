@@ -297,6 +297,6 @@ iza-app/
 |---------------------|---------------|
 | ![Booking 1](assets/booking-1.png) | ![Booking 2](assets/booking-2.png) |
 | ![Booking 3](assets/booking-3.png) | ![Booking 4](assets/booking-4.png) |
-| ![Booking 3](assets/booking-5.png) | ![Booking Succes](assets/booking-success.png) |
+| ![Booking Succes](assets/booking-success.png) |  |
 
 *Note: The app supports both light and dark mode themes for optimal user experience.*
