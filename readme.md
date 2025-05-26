@@ -2,6 +2,10 @@
 
 *GITHUB REPO FOR DEV HISTORY REFERENCE:* https://github.com/Spioss/SwitfUI-Trip-App/tree/main
 
+### Testing login and password
+- email: test@gmail.com
+- pass: 123456
+
 ## 📱 Overview
 
 **NxTrip** is a modern iOS flight booking application built with SwiftUI that allows users to search for flights, book tickets, and manage their travel plans. The app features a clean, intuitive interface with comprehensive flight search capabilities and secure payment processing.
@@ -279,7 +283,6 @@ iza-app/
 - **Flight Status Tracking**: Real-time flight status updates
 - **Offline Mode**: Basic functionality without internet
 - **Multi-language Support**: Localization for international users
-
 
 ### App Screenshots
 
