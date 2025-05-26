@@ -13,7 +13,6 @@ struct ProfileView: View {
     @State private var showRenameAlert = false
     @State private var showPhoneAlert = false
     @State private var showAddCardView = false
-    @State private var showCardDetail = false
     @State private var selectedCard: SavedCreditCard?
     @State private var newFullName = ""
     @State private var newPhoneNumber = ""
@@ -45,14 +44,6 @@ struct ProfileView: View {
                 }
                 
                 Section("Personal Information") {
-                    // Name row
-                    HStack {
-                        TextWithImage(imageName: "person.fill", title: "Name", tintColor: .blue)
-                        Spacer()
-                        Text(user.fullname)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
                     
                     // Phone row
                     HStack {
@@ -65,13 +56,6 @@ struct ProfileView: View {
                     
                     // Edit buttons
                     Button{
-                        newFullName = user.fullname
-                        showRenameAlert = true
-                    } label: {
-                        TextWithImage(imageName: "pencil.circle.fill", title: "Change Name", tintColor: .blue)
-                    }
-                    
-                    Button{
                         newPhoneNumber = user.phone ?? ""
                         showPhoneAlert = true
                     } label: {
@@ -81,6 +65,14 @@ struct ProfileView: View {
                             tintColor: user.hasPhone ? .green : .orange
                         )
                     }
+                    
+                    Button{
+                        newFullName = user.fullname
+                        showRenameAlert = true
+                    } label: {
+                        TextWithImage(imageName: "pencil.circle.fill", title: "Change Name", tintColor: .blue)
+                    }
+                    
                 }
                 
                 Section("Payment Methods") {
@@ -88,7 +80,6 @@ struct ProfileView: View {
                         ForEach(user.savedCards) { card in
                             Button{
                                 selectedCard = card
-                                showCardDetail = true
                             } label: {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -102,6 +93,7 @@ struct ProfileView: View {
                                                 .fontWeight(.medium)
                                                 .foregroundColor(.primary)
                                             
+                                            Spacer()
                                             if card.isDefault {
                                                 Text("DEFAULT")
                                                     .font(.caption2)
@@ -118,18 +110,12 @@ struct ProfileView: View {
                                             Text(card.maskedNumber)
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
-                                            
+                                            Spacer()
                                             Text("Expires \(card.expiryDate)")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
                                     }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
                                 }
                             }
                             .buttonStyle(.plain)
@@ -186,11 +172,9 @@ struct ProfileView: View {
                 AddCardView()
                     .environmentObject(viewModel)
             }
-            .sheet(isPresented: $showCardDetail) {
-                if let card = selectedCard {
-                    CardDetailView(card: card)
-                        .environmentObject(viewModel)
-                }
+            .sheet(item: $selectedCard) { card in
+                CardDetailView(card: card)
+                    .environmentObject(viewModel)
             }
             .alert("Change Name", isPresented: $showRenameAlert) {
                 TextField("Full Name", text: $newFullName)
@@ -221,7 +205,7 @@ struct ProfileView: View {
                 if user.hasPhone {
                     Button("Remove", role: .destructive) {
                         Task {
-                            await updatePhoneNumber(phone: nil)
+                            await updatePhoneNumber(phone: "")
                         }
                     }
                 }

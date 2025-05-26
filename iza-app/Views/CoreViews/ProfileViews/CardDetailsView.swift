@@ -14,6 +14,7 @@ struct CardDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteAlert = false
     @State private var isUpdating = false
+    @State private var refreshView = false
     
     var body: some View {
         NavigationView {
@@ -57,10 +58,6 @@ struct CardDetailView: View {
     
     private var largeCardPreview: some View {
         VStack(spacing: 16) {
-            Text("Card Preview")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
             VStack(spacing: 12) {
                 // Card Header
                 HStack {
@@ -261,6 +258,7 @@ struct CardDetailView: View {
         isUpdating = true
         await authViewModel.setDefaultCard(card.id)
         isUpdating = false
+        dismiss()
     }
     
     private func removeCard() async {
