@@ -1,10 +1,27 @@
-# NxTrip - Flight Booking iOS Application
+<p align="center">
+  <img src="https://developer.apple.com/assets/elements/icons/swift/swift-64x64_2x.png" width="100" alt="NxTrip logo">
+</p>
 
-*GITHUB REPO FOR DEV HISTORY REFERENCE:* https://github.com/Spioss/SwitfUI-Trip-App/tree/main
+<h1 align="center">✈️ NxTrip – Flight Booking iOS App</h1>
 
-### Testing login and password
-- email: test@gmail.com
-- pass: 123456
+<p align="center">
+  <strong>A SwiftUI application for booking flights and managing tickets.</strong>
+</p>
+
+<p align="center">
+  <a href="#📱-overview">📱 Overview</a> • 
+  <a href="#🔧-core-components">🔧 Core Features</a> • 
+  <a href="#📈-current-development-status">📈 Development Status</a> •
+  <a href="#app-screenshots">📸 Screenshots</a> •
+  <a href="#📦-project-structure">📦 Project Structure</a> 
+</p>
+
+<p align="center">
+  <a href="#"><img alt="macOS Build Status" src="https://img.shields.io/badge/macos-passing-brightgreen.svg"></a>
+  <a href="#"><img alt="iOS Target" src="https://img.shields.io/badge/iOS-18.4%2B-blue"></a>
+  <a href="#"><img alt="Swift Version" src="https://img.shields.io/badge/Swift-5.0-orange.svg"></a>
+</p>
+
 
 ## 📱 Overview
 
@@ -105,7 +122,6 @@ func deleteAccount()
 - Add to calendar integration
 - Online check-in functionality (*probably not dont know hard it is*)
 
----
 
 ## 📱 User Interface Structure
 
@@ -161,7 +177,6 @@ func searchAirports(keyword: String) -> [SimpleAirport]
 func searchFlights(request: FlightSearchRequest) -> [SimpleFlight]
 ```
 
----
 
 ## 💾 Data Models
 
