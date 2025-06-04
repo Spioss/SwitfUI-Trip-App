@@ -23,6 +23,9 @@ struct TicketDetailView: View {
                     // Boarding Pass Style Card
                     boardingPassCard
                     
+                    //QRCode
+                    QRCodeView(content: ticket.id)
+                    
                     // Flight Details
                     flightDetailsSection
                     
