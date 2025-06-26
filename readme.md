@@ -76,7 +76,7 @@ func signOut()
 func deleteAccount()
 ```
 
-*Note: Google and Apple sign-in integration is planned for future releases.*
+*Note: Google and Apple sign-in integration is planned for future.*
 
 ### Flight Search & Booking
 **Files**: `FlightViewModel.swift`, `FlightSearchView.swift`, `BookingViewModel.swift`
