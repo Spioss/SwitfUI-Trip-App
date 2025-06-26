@@ -314,4 +314,4 @@ iza-app/
 | ![Booking 3](assets/booking-3.png) | ![Booking 4](assets/booking-4.png) |
 | ![Booking Succes](assets/booking-success.png) |  |
 
-*Note: The app supports both light and dark mode themes for optimal user experience.*
+*Note: The app supports both light and dark mode themes.*
