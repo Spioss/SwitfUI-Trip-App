@@ -8,8 +8,7 @@
 import SwiftUI
 import FirebaseAuth
 
-struct RnView: View {
-    @EnvironmentObject var authViewModel: AuthViewModel
+struct SaveTheTicket: View {
     
     var body: some View {
         VStack {

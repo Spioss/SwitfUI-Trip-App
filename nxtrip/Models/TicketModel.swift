@@ -1,11 +1,33 @@
 //
-//  BookingModels.swift
+//  TicketModel.swift
 //  iza-app
 //
 //  Created by Lukáš Mader on 25/05/2025.
 //
 
 import Foundation
+import FirebaseFirestore
+
+// MARK: - Main Booking Model (renamed from BookedTicket)
+struct Booking: Identifiable, Codable {
+    @DocumentID var id: String?
+    let userId: String
+    let bookingReference: String
+    let bookingDate: Date
+    let flight: SimpleFlight
+    let passengerInfo: PassengerInfo
+    let paymentInfo: PaymentInfo
+    let status: String  // "pending", "confirmed", "cancelled"
+    
+    // Computed properties for backward compatibility
+    var totalPrice: Double {
+        flight.price.totalAsDouble
+    }
+    
+    var formattedPrice: String {
+        flight.price.formattedPrice
+    }
+}
 
 // MARK: - Passenger Info
 struct PassengerInfo: Codable {
@@ -22,15 +44,19 @@ struct PassengerInfo: Codable {
 
 // MARK: - Payment Info
 struct PaymentInfo: Codable {
-    let cardNumber: String // Only last 4 digits stored
-    let cardType: CardType
-    let cardHolderName: String
     let amount: Double
-    let currency: String
+    let cardHolderName: String
+    let cardNumber: String      // Last 4 digits only "2346"
+    let cardType: String        // "Visa", "Mastercard", "Other"
+    let currency: String        // "EUR"
     let paymentDate: Date
     
     var maskedCardNumber: String {
         "**** **** **** \(cardNumber)"
+    }
+    
+    var cardTypeEnum: CardType {
+        CardType(rawValue: cardType) ?? .other
     }
 }
 
@@ -49,17 +75,5 @@ enum CardType: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - Booked Ticket (simplified for now)
-struct BookedTicket: Identifiable, Codable {
-    let id: String
-    let userId: String
-    let bookingReference: String
-    let flight: SimpleFlight
-    let passengerInfo: PassengerInfo
-    let paymentInfo: PaymentInfo
-    let bookingDate: Date
-    
-    var totalPrice: Double {
-        Double(flight.totalPrice) ?? 0.0
-    }
-}
+// MARK: - Type Alias for backward compatibility
+typealias BookedTicket = Booking

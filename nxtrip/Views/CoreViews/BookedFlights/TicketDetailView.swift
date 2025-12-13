@@ -24,7 +24,7 @@ struct TicketDetailView: View {
                     boardingPassCard
                     
                     //QRCode
-                    QRCodeView(content: ticket.id)
+                    QRCodeView(content: ticket.id ?? "")
                     
                     // Flight Details
                     flightDetailsSection
@@ -252,7 +252,7 @@ struct TicketDetailView: View {
             
             VStack(spacing: 12) {
                 DetailRow(label: "Total Amount", value: "\(Int(ticket.totalPrice)) \(ticket.flight.currency)", valueColor: .green)
-                DetailRow(label: "Payment Method", value: ticket.paymentInfo.cardType.rawValue)
+                DetailRow(label: "Payment Method", value: ticket.paymentInfo.cardType)
                 DetailRow(label: "Card", value: ticket.paymentInfo.maskedCardNumber)
                 DetailRow(label: "Payment Date", value: formatPaymentDate(ticket.paymentInfo.paymentDate))
             }

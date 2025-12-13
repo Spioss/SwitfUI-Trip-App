@@ -11,7 +11,7 @@ import FirebaseFirestore
 
 @MainActor
 class TicketViewModel: ObservableObject {
-    @Published var bookedTickets: [BookedTicket] = []
+    @Published var bookedTickets: [Booking] = []
     @Published var isLoading = false
     @Published var errorMessage = ""
     
@@ -29,21 +29,24 @@ class TicketViewModel: ObservableObject {
                 .order(by: "bookingDate", descending: true)
                 .getDocuments()
             
-            var tickets: [BookedTicket] = []
+            var tickets: [Booking] = []
             
             for document in querySnapshot.documents {
                 do {
-                    let ticket = try document.data(as: BookedTicket.self)
+                    let ticket = try document.data(as: Booking.self)
                     tickets.append(ticket)
                 } catch {
-                    print("Error decoding ticket: \(error)")
+                    print("DEBUG: Error decoding ticket \(document.documentID): \(error)")
+                    print("DEBUG: Document data: \(document.data())")
                 }
             }
             
             self.bookedTickets = tickets
+            print("DEBUG: Successfully loaded \(tickets.count) tickets")
             
         } catch {
             errorMessage = "Failed to fetch tickets: \(error.localizedDescription)"
+            print("DEBUG: Fetch error: \(error)")
         }
         
         isLoading = false

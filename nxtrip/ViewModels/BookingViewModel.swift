@@ -14,7 +14,7 @@ class BookingViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage = ""
     @Published var bookingSuccess = false
-    @Published var currentBooking: BookedTicket?
+    @Published var currentBooking: Booking?
     
     // Form fields
     @Published var firstName = ""
@@ -55,35 +55,45 @@ class BookingViewModel: ObservableObject {
             )
             
             let paymentInfo = PaymentInfo(
-                cardNumber: String(cardNumber.suffix(4)),
-                cardType: selectedCardType,
-                cardHolderName: cardHolderName,
                 amount: Double(flight.totalPrice) ?? 0.0,
+                cardHolderName: cardHolderName,
+                cardNumber: String(cardNumber.suffix(4)),
+                cardType: selectedCardType.rawValue,
                 currency: flight.currency,
                 paymentDate: Date()
             )
             
-            let bookedTicket = BookedTicket(
-                id: UUID().uuidString,
+            // Vytvor booking s id: nil
+            let booking = Booking(
+                id: nil,
                 userId: userId,
                 bookingReference: bookingReference,
+                bookingDate: Date(),
                 flight: flight,
                 passengerInfo: passengerInfo,
                 paymentInfo: paymentInfo,
-                bookingDate: Date()
+                status: "pending"
             )
             
-            // Save to Firestore
-            let encodedTicket = try Firestore.Encoder().encode(bookedTicket)
-            try await db.collection("bookings").document(bookedTicket.id).setData(encodedTicket)
+            // Vytvor nový dokument a nechaj Firestore vygenerovať ID
+            let docRef = db.collection("bookings").document()
             
-            // Update local state
-            currentBooking = bookedTicket
+            // Enkóduj booking
+            let encodedBooking = try Firestore.Encoder().encode(booking)
+            
+            // Ulož do Firestore
+            try await docRef.setData(encodedBooking)
+            
+            // Načítaj booking znova s ID z Firestore
+            let savedSnapshot = try await docRef.getDocument()
+            self.currentBooking = try savedSnapshot.data(as: Booking.self)
+            
             bookingSuccess = true
             clearForm()
             
         } catch {
             errorMessage = "Booking failed: \(error.localizedDescription)"
+            print("DEBUG: Booking error - \(error)")
         }
         
         isLoading = false

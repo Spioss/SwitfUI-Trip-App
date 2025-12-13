@@ -25,10 +25,10 @@ struct MainView: View {
                     Text("Booked tickets")
                 }
                 
-            RnView()
+            SaveTheTicket()
                 .tabItem {
-                    Image(systemName: "folder.fill")
-                    Text("Another")
+                    Image(systemName: "cart.fill")
+                    Text("SaveTheTicket")
                 }
             
             ProfileView()

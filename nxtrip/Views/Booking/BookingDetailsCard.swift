@@ -208,7 +208,7 @@ struct PaymentSummaryCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(payment.cardType.rawValue)
+                    Text(payment.cardType)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
