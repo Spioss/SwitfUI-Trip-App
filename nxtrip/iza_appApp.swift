@@ -16,6 +16,7 @@ struct iza_appApp: App{
         FirebaseApp.configure()
     }
     
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

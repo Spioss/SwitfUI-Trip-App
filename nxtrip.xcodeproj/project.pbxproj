@@ -13,26 +13,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		80659A112DDBF09E0043EC05 /* iza-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iza-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		80659A112DDBF09E0043EC05 /* nxtrip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nxtrip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		801B6DB12DE2A730000F5219 /* Exceptions for "iza-app" folder in "iza-app" target */ = {
+		801B6DB12DE2A730000F5219 /* Exceptions for "nxtrip" folder in "nxtrip" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 80659A102DDBF09E0043EC05 /* iza-app */;
+			target = 80659A102DDBF09E0043EC05 /* nxtrip */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		80659A132DDBF09E0043EC05 /* iza-app */ = {
+		80659A132DDBF09E0043EC05 /* nxtrip */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				801B6DB12DE2A730000F5219 /* Exceptions for "iza-app" folder in "iza-app" target */,
+				801B6DB12DE2A730000F5219 /* Exceptions for "nxtrip" folder in "nxtrip" target */,
 			);
-			path = "iza-app";
+			path = nxtrip;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -54,7 +54,7 @@
 		80659A082DDBF09E0043EC05 = {
 			isa = PBXGroup;
 			children = (
-				80659A132DDBF09E0043EC05 /* iza-app */,
+				80659A132DDBF09E0043EC05 /* nxtrip */,
 				80659A122DDBF09E0043EC05 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,7 +62,7 @@
 		80659A122DDBF09E0043EC05 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				80659A112DDBF09E0043EC05 /* iza-app.app */,
+				80659A112DDBF09E0043EC05 /* nxtrip.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,9 +70,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		80659A102DDBF09E0043EC05 /* iza-app */ = {
+		80659A102DDBF09E0043EC05 /* nxtrip */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 80659A1C2DDBF09F0043EC05 /* Build configuration list for PBXNativeTarget "iza-app" */;
+			buildConfigurationList = 80659A1C2DDBF09F0043EC05 /* Build configuration list for PBXNativeTarget "nxtrip" */;
 			buildPhases = (
 				80659A0D2DDBF09E0043EC05 /* Sources */,
 				80659A0E2DDBF09E0043EC05 /* Frameworks */,
@@ -83,16 +83,16 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				80659A132DDBF09E0043EC05 /* iza-app */,
+				80659A132DDBF09E0043EC05 /* nxtrip */,
 			);
-			name = "iza-app";
+			name = nxtrip;
 			packageProductDependencies = (
 				80C7D5CB2DE158C300F78086 /* FirebaseAuth */,
 				80C7D5CD2DE158C300F78086 /* FirebaseFirestore */,
 				80C7D5D32DE15C3200F78086 /* FirebaseStorage */,
 			);
 			productName = "iza-app";
-			productReference = 80659A112DDBF09E0043EC05 /* iza-app.app */;
+			productReference = 80659A112DDBF09E0043EC05 /* nxtrip.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -103,14 +103,14 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					80659A102DDBF09E0043EC05 = {
 						CreatedOnToolsVersion = 16.3;
 					};
 				};
 			};
-			buildConfigurationList = 80659A0C2DDBF09E0043EC05 /* Build configuration list for PBXProject "iza-app" */;
+			buildConfigurationList = 80659A0C2DDBF09E0043EC05 /* Build configuration list for PBXProject "nxtrip" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -127,7 +127,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				80659A102DDBF09E0043EC05 /* iza-app */,
+				80659A102DDBF09E0043EC05 /* nxtrip */,
 			);
 		};
 /* End PBXProject section */
@@ -188,6 +188,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = Z4XQG2Q8RX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -211,6 +212,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -251,6 +253,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = Z4XQG2Q8RX;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -267,6 +270,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -279,10 +283,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z4XQG2Q8RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iza-app/Info.plist";
+				INFOPLIST_FILE = nxtrip/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -293,7 +296,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "goodguys.iza-app";
+				PRODUCT_BUNDLE_IDENTIFIER = goodguy.NxTrip;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -308,10 +311,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z4XQG2Q8RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iza-app/Info.plist";
+				INFOPLIST_FILE = nxtrip/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -322,7 +324,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "goodguys.iza-app";
+				PRODUCT_BUNDLE_IDENTIFIER = goodguy.NxTrip;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -333,7 +335,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		80659A0C2DDBF09E0043EC05 /* Build configuration list for PBXProject "iza-app" */ = {
+		80659A0C2DDBF09E0043EC05 /* Build configuration list for PBXProject "nxtrip" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				80659A1A2DDBF09F0043EC05 /* Debug */,
@@ -342,7 +344,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		80659A1C2DDBF09F0043EC05 /* Build configuration list for PBXNativeTarget "iza-app" */ = {
+		80659A1C2DDBF09F0043EC05 /* Build configuration list for PBXNativeTarget "nxtrip" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				80659A1D2DDBF09F0043EC05 /* Debug */,

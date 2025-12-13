@@ -49,14 +49,14 @@ struct ProfileView: View {
                     HStack {
                         TextWithImage(imageName: "phone.fill", title: "Phone", tintColor: .green)
                         Spacer()
-                        Text(user.hasPhone ? user.phone! : "Not provided")
+                        Text(user.hasPhone ? user.phone : "Not provided")
                             .font(.subheadline)
                             .foregroundColor(user.hasPhone ? .secondary : .orange)
                     }
                     
                     // Edit buttons
                     Button{
-                        newPhoneNumber = user.phone ?? ""
+                        newPhoneNumber = user.phone
                         showPhoneAlert = true
                     } label: {
                         TextWithImage(

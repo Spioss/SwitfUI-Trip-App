@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct User: Identifiable, Codable {
-    let id: String
+    @DocumentID var id: String?
     let fullname: String
     let email: String
-    let phone: String?
+    let phone: String
     let savedCards: [SavedCreditCard]
     
     var initials: String {
@@ -25,11 +26,15 @@ struct User: Identifiable, Codable {
     }
     
     var hasPhone: Bool {
-        return phone != nil && !phone!.isEmpty
+        return !phone.isEmpty
+    }
+    
+    var userId: String {
+        return id ?? ""
     }
         
     var displayPhone: String {
-        return phone ?? "Not provided"
+        return phone.isEmpty ? "Not provided" : phone
     }
     
     var defaultCard: SavedCreditCard? {

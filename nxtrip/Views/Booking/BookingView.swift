@@ -532,7 +532,7 @@ struct BookingView: View {
         bookingViewModel.prefillUserData(
             fullname: user.fullname,
             email: user.email,
-            phone: user.phone ?? "",
+            phone: user.phone,
             defaultCard: user.defaultCard
         )
     }

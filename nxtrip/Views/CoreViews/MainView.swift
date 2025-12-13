@@ -25,6 +25,12 @@ struct MainView: View {
                     Text("Booked tickets")
                 }
                 
+            RnView()
+                .tabItem {
+                    Image(systemName: "folder.fill")
+                    Text("Another")
+                }
+            
             ProfileView()
                 .tabItem {
                     Image(systemName: "person.fill")

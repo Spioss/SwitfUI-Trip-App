@@ -57,9 +57,9 @@ class AuthViewModel: ObservableObject {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
-            let user = User(id: result.user.uid, fullname: fullname, email: email, phone: nil, savedCards: []) // our model currentUser
+            let user = User(id: nil, fullname: fullname, email: email, phone: "", savedCards: []) // our model currentUser
             let encodedUser = try Firestore.Encoder().encode(user)
-            try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
+            try await Firestore.firestore().collection("users").document(result.user.uid).setData(encodedUser)
             await fetchUser() // wait for fetch of data to our Model
         } catch let error as NSError{
             switch AuthErrorCode(rawValue: error.code) {
@@ -159,7 +159,7 @@ extension AuthViewModel {
         return (
             fullname: user.fullname,
             email: user.email,
-            phone: user.phone ?? ""
+            phone: user.phone
         )
     }
 }
