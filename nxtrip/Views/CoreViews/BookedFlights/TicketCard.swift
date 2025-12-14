@@ -11,6 +11,11 @@ struct TicketCard: View {
     let ticket: BookedTicket
     @EnvironmentObject var viewModel: TicketViewModel
     
+    // Check if ticket is transferred (sold)
+    private var isTransferred: Bool {
+        ticket.status == "transferred"
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // Header with booking reference and status
@@ -21,14 +26,20 @@ struct TicketCard: View {
             
             // Bottom info
             ticketFooter
+            
+            // Sold overlay banner
+            if isTransferred {
+                soldBanner
+            }
         }
-        .background(Color.adaptiveInputBackground)
+        .background(isTransferred ? Color.gray.opacity(0.3) : Color.adaptiveInputBackground)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
+        .shadow(color: Color.black.opacity(isTransferred ? 0.05 : 0.1), radius: 6, x: 0, y: 3)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(statusColor.opacity(0.3), lineWidth: 2)
+                .stroke(isTransferred ? Color.gray.opacity(0.5) : statusColor.opacity(0.3), lineWidth: 2)
         )
+        .opacity(isTransferred ? 0.6 : 1.0) // ✅ Dim sold tickets
     }
     
     // MARK: - Header
@@ -41,7 +52,8 @@ struct TicketCard: View {
                 
                 Text(ticket.bookingReference)
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundColor(.purple)
+                    .foregroundColor(isTransferred ? .gray : .purple)
+                    .strikethrough(isTransferred, color: .gray) // ✅ Strikethrough if sold
                 
                 HStack(spacing: 4) {
                     Image(systemName: ticket.travelClass.icon)
@@ -49,29 +61,45 @@ struct TicketCard: View {
                     Text(ticket.travelClass.rawValue)
                         .font(.caption)
                         .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(ticket.travelClass.color)
-                    .cornerRadius(6)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(isTransferred ? Color.gray : ticket.travelClass.color)
+                .cornerRadius(6)
             }
             
             Spacer()
             
             VStack(alignment: .trailing, spacing: 4) {
-                HStack(spacing: 4) {
-                    Image(systemName: flightStatus.icon)
-                        .font(.caption)
-                    Text(flightStatus.text)
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                // Show "Sold" badge instead of flight status
+                if isTransferred {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.triangle.swap")
+                            .font(.caption)
+                        Text("SOLD")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.gray)
+                    .cornerRadius(8)
+                } else {
+                    HStack(spacing: 4) {
+                        Image(systemName: flightStatus.icon)
+                            .font(.caption)
+                        Text(flightStatus.text)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(flightStatus.color)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(flightStatus.color.opacity(0.1))
+                    .cornerRadius(8)
                 }
-                .foregroundColor(flightStatus.color)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(flightStatus.color.opacity(0.1))
-                .cornerRadius(8)
                 
                 Text(viewModel.formatFlightDate(ticket.flight.outbound.firstSegment.departure.at))
                     .font(.caption)
@@ -79,15 +107,14 @@ struct TicketCard: View {
                 
                 if ticket.numberOfTickets > 1 {
                     HStack(spacing: 4) {
-                    Image(systemName: "ticket.fill")
-                        .font(.caption2)
-                    Text("\(ticket.numberOfTickets) tickets")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                 }
-                .foregroundColor(.purple)
-               }
-            
+                        Image(systemName: "ticket.fill")
+                            .font(.caption2)
+                        Text("\(ticket.numberOfTickets) tickets")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(isTransferred ? .gray : .purple)
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -105,7 +132,8 @@ struct TicketCard: View {
                 departureTime: viewModel.formatTime(ticket.flight.outbound.firstSegment.departure.at),
                 arrivalTime: viewModel.formatTime(ticket.flight.outbound.lastSegment.arrival.at),
                 date: viewModel.formatFlightDate(ticket.flight.outbound.firstSegment.departure.at),
-                isReturn: false
+                isReturn: false,
+                isTransferred: isTransferred // ✅ Pass transfer status
             )
             
             // Return flight if exists
@@ -119,7 +147,8 @@ struct TicketCard: View {
                     departureTime: viewModel.formatTime(returnFlight.firstSegment.departure.at),
                     arrivalTime: viewModel.formatTime(returnFlight.lastSegment.arrival.at),
                     date: viewModel.formatFlightDate(returnFlight.firstSegment.departure.at),
-                    isReturn: true
+                    isReturn: true,
+                    isTransferred: isTransferred // ✅ Pass transfer status
                 )
             }
         }
@@ -137,26 +166,27 @@ struct TicketCard: View {
                 Text(ticket.passengerInfo.fullName)
                     .font(.subheadline)
                     .fontWeight(.medium)
+                    .foregroundColor(isTransferred ? .gray : .primary)
             }
             
             Spacer()
             
             VStack(alignment: .trailing, spacing: 4) {
-                Text("Total Paid")
+                Text(isTransferred ? "Was Paid" : "Total Paid")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                            
+                
                 VStack(alignment: .trailing, spacing: 2) {
-                Text(ticket.formattedPrice)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.green)
-                                
-                // breakdown if multiple tickets
-                if ticket.numberOfTickets > 1 {
-                    Text("\(ticket.formattedPricePerTicket) × \(ticket.numberOfTickets)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                    Text(ticket.formattedPrice)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundColor(isTransferred ? .gray : .green)
+                        .strikethrough(isTransferred, color: .gray) // ✅ Strikethrough price
+                    
+                    if ticket.numberOfTickets > 1 {
+                        Text("\(ticket.formattedPricePerTicket) × \(ticket.numberOfTickets)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
@@ -164,7 +194,36 @@ struct TicketCard: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 16)
         .padding(.top, 16)
-        .background(Color.adaptiveSecondaryBackground.opacity(0.5))
+        .background(isTransferred ? Color.gray.opacity(0.2) : Color.adaptiveSecondaryBackground.opacity(0.5))
+        .cornerRadius(16, corners: [.bottomLeft, .bottomRight])
+    }
+    
+    // Sold Banner Overlay
+    private var soldBanner: some View {
+        VStack {
+            Spacer()
+            
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.white)
+                
+                Text("This ticket was sold via SaveTheTicket")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                
+                Spacer()
+            }
+            .padding()
+            .background(
+                LinearGradient(
+                    colors: [Color.gray.opacity(0.9), Color.gray.opacity(0.7)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+        }
         .cornerRadius(16, corners: [.bottomLeft, .bottomRight])
     }
     
@@ -174,11 +233,11 @@ struct TicketCard: View {
     }
     
     private var statusColor: Color {
-        flightStatus.color
+        isTransferred ? .gray : flightStatus.color
     }
 }
 
-// MARK: - Flight Route Component
+// MARK: - Flight Route Component (Updated)
 struct FlightRoute: View {
     let from: String
     let to: String
@@ -186,6 +245,7 @@ struct FlightRoute: View {
     let arrivalTime: String
     let date: String
     let isReturn: Bool
+    let isTransferred: Bool
     
     var body: some View {
         VStack(spacing: 8) {
@@ -203,6 +263,7 @@ struct FlightRoute: View {
                     Text(from)
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(isTransferred ? .gray : .primary)
                     Text(departureTime)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -214,10 +275,10 @@ struct FlightRoute: View {
                 VStack(spacing: 4) {
                     Image(systemName: "airplane")
                         .font(.caption)
-                        .foregroundColor(.purple)
+                        .foregroundColor(isTransferred ? .gray : .purple)
                     
                     Rectangle()
-                        .fill(Color.purple.opacity(0.3))
+                        .fill(isTransferred ? Color.gray.opacity(0.3) : Color.purple.opacity(0.3))
                         .frame(height: 2)
                         .frame(width: 60)
                 }
@@ -229,6 +290,7 @@ struct FlightRoute: View {
                     Text(to)
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(isTransferred ? .gray : .primary)
                     Text(arrivalTime)
                         .font(.subheadline)
                         .foregroundColor(.secondary)

@@ -11,6 +11,7 @@ struct TicketsView: View {
     @StateObject private var ticketViewModel = TicketViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var selectedTicket: BookedTicket?
+    @State private var selectedSoldTicket: BookedTicket? // For sold tickets
     @State private var searchText = ""
     @State private var selectedFilter: TicketFilter = .all
     
@@ -28,7 +29,11 @@ struct TicketsView: View {
             .navigationTitle("My Tickets")
             .refreshable {
                 if let userId = authViewModel.currentUser?.id {
-                    await ticketViewModel.fetchUserTickets(userId: userId)
+                    // Include transferred tickets when filter is "sold"
+                    await ticketViewModel.fetchUserTickets(
+                        userId: userId,
+                        includeTransferred: selectedFilter == .transferred
+                    )
                 }
             }
             .onAppear {
@@ -38,9 +43,23 @@ struct TicketsView: View {
                     }
                 }
             }
+            // Refresh when filter changes
+            .onChange(of: selectedFilter) { _, newFilter in
+                if let userId = authViewModel.currentUser?.id {
+                    Task {
+                        await ticketViewModel.fetchUserTickets(
+                            userId: userId,
+                            includeTransferred: newFilter == .transferred
+                        )
+                    }
+                }
+            }
             .sheet(item: $selectedTicket) { ticket in
                 TicketDetailView(ticket: ticket)
                     .environmentObject(ticketViewModel)
+            }
+            .sheet(item: $selectedSoldTicket) { ticket in
+                SoldTicketInfoView(ticket: ticket)
             }
         }
     }
@@ -63,16 +82,18 @@ struct TicketsView: View {
     // MARK: - Empty State View
     private var emptyStateView: some View {
         VStack(spacing: 24) {
-            Image(systemName: "airplane.circle")
+            Image(systemName: selectedFilter == .transferred ? "arrow.triangle.swap" : "airplane.circle")
                 .font(.system(size: 80))
                 .foregroundColor(.purple.opacity(0.5))
             
             VStack(spacing: 12) {
-                Text("No Flights Booked Yet")
+                Text(selectedFilter == .transferred ? "No Sold Tickets" : "No Flights Booked Yet")
                     .font(.title2)
                     .fontWeight(.bold)
                 
-                Text("Your booked flights will appear here. Start exploring destinations and book your next adventure!")
+                Text(selectedFilter == .transferred ?
+                     "Tickets you sell via SaveTheTicket will appear here." :
+                     "Your booked flights will appear here. Start exploring destinations and book your next adventure!")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -93,13 +114,26 @@ struct TicketsView: View {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     ForEach(filteredTickets) { ticket in
-                        Button {
-                            selectedTicket = ticket
-                        } label: {
-                            TicketCard(ticket: ticket)
-                                .environmentObject(ticketViewModel)
+                        // Different behavior for sold vs active tickets
+                        if ticket.status == "transferred" {
+                            // Clickable sold ticket - shows info only
+                            Button {
+                                selectedSoldTicket = ticket
+                            } label: {
+                                TicketCard(ticket: ticket)
+                                    .environmentObject(ticketViewModel)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            // Clickable active ticket - full detail
+                            Button {
+                                selectedTicket = ticket
+                            } label: {
+                                TicketCard(ticket: ticket)
+                                    .environmentObject(ticketViewModel)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -183,6 +217,11 @@ struct TicketsView: View {
             tickets = tickets.filter { ticket in
                 ticketViewModel.getFlightStatus(ticket.flight.outbound.firstSegment.departure.at) == .completed
             }
+        case .transferred:
+            // Show only transferred tickets
+            tickets = tickets.filter { ticket in
+                ticket.status == "transferred"
+            }
         }
         
         return tickets
@@ -191,19 +230,25 @@ struct TicketsView: View {
     private func ticketCount(for filter: TicketFilter) -> Int {
         switch filter {
         case .all:
-            return ticketViewModel.bookedTickets.count
+            return ticketViewModel.bookedTickets.filter { $0.status != "transferred" }.count
         case .upcoming:
             return ticketViewModel.bookedTickets.filter { ticket in
+                ticket.status != "transferred" &&
                 ticketViewModel.getFlightStatus(ticket.flight.outbound.firstSegment.departure.at) == .upcoming
             }.count
         case .soon:
             return ticketViewModel.bookedTickets.filter { ticket in
+                ticket.status != "transferred" &&
                 ticketViewModel.getFlightStatus(ticket.flight.outbound.firstSegment.departure.at) == .soon
             }.count
         case .completed:
             return ticketViewModel.bookedTickets.filter { ticket in
+                ticket.status != "transferred" &&
                 ticketViewModel.getFlightStatus(ticket.flight.outbound.firstSegment.departure.at) == .completed
             }.count
+        case .transferred:
+            // Count sold tickets separately
+            return ticketViewModel.bookedTickets.filter { $0.status == "transferred" }.count
         }
     }
 }
@@ -249,17 +294,20 @@ enum TicketFilter: CaseIterable {
     case upcoming
     case soon
     case completed
+    case transferred // Show sold tickets
     
     var title: String {
         switch self {
         case .all:
-            return "All"
+            return "Active"
         case .upcoming:
             return "Upcoming"
         case .soon:
             return "Check-in"
         case .completed:
             return "Completed"
+        case .transferred:
+            return "Sold"
         }
     }
 }

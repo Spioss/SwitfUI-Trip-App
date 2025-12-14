@@ -19,13 +19,21 @@ class TicketViewModel: ObservableObject {
     
     // MARK: - Fetch User's Tickets
     
-    func fetchUserTickets(userId: String) async {
+    // Added includeTransferred parameter to filter out sold tickets
+    func fetchUserTickets(userId: String, includeTransferred: Bool = false) async {
         isLoading = true
         errorMessage = ""
         
         do {
-            let querySnapshot = try await db.collection("bookings")
+            var query = db.collection("bookings")
                 .whereField("userId", isEqualTo: userId)
+            
+            // Filter out transferred tickets by default (sold via SaveTheTicket)
+            if !includeTransferred {
+                query = query.whereField("status", in: ["pending", "confirmed", "cancelled"])
+            }
+            
+            let querySnapshot = try await query
                 .order(by: "bookingDate", descending: true)
                 .getDocuments()
             
@@ -42,7 +50,7 @@ class TicketViewModel: ObservableObject {
             }
             
             self.bookedTickets = tickets
-            print("DEBUG: Successfully loaded \(tickets.count) tickets")
+            print("DEBUG: Successfully loaded \(tickets.count) tickets (includeTransferred: \(includeTransferred))")
             
         } catch {
             errorMessage = "Failed to fetch tickets: \(error.localizedDescription)"
@@ -124,6 +132,7 @@ enum FlightStatus {
     case upcoming
     case soon
     case completed
+    case transferred // For sold tickets
     case unknown
     
     var color: Color {
@@ -134,6 +143,8 @@ enum FlightStatus {
             return .orange
         case .completed:
             return .green
+        case .transferred:
+            return .purple
         case .unknown:
             return .gray
         }
@@ -147,6 +158,8 @@ enum FlightStatus {
             return "Check-in Open"
         case .completed:
             return "Completed"
+        case .transferred:
+            return "Sold"
         case .unknown:
             return "Unknown"
         }
@@ -160,6 +173,8 @@ enum FlightStatus {
             return "exclamationmark.triangle"
         case .completed:
             return "checkmark.circle"
+        case .transferred:
+            return "arrow.triangle.swap"
         case .unknown:
             return "questionmark.circle"
         }
