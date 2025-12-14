@@ -25,7 +25,7 @@ struct MainView: View {
                     Text("Booked tickets")
                 }
                 
-            SaveTheTicket()
+            SaveTheTicketView()
                 .tabItem {
                     Image(systemName: "cart.fill")
                     Text("SaveTheTicket")

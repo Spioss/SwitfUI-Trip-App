@@ -11,11 +11,14 @@ struct ProfileView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     @State private var showDeleteAlert = false
     @State private var showRenameAlert = false
-    @State private var showPhoneAlert = false
     @State private var showAddCardView = false
     @State private var selectedCard: SavedCreditCard?
     @State private var newFullName = ""
-    @State private var newPhoneNumber = ""
+    
+    // Inline phone editing
+    @State private var isEditingPhone = false
+    @State private var phoneText = ""
+    @FocusState private var isPhoneFocused: Bool
     
     var body: some View {
         if let user = viewModel.currentUser {
@@ -44,38 +47,68 @@ struct ProfileView: View {
                 }
                 
                 Section("Personal Information") {
-                    
-                    // Phone row
+                    // Inline Phone Editing
                     HStack {
-                        TextWithImage(imageName: "phone.fill", title: "Phone", tintColor: .green)
-                        Spacer()
-                        Text(user.hasPhone ? user.phone : "Not provided")
-                            .font(.subheadline)
-                            .foregroundColor(user.hasPhone ? .secondary : .orange)
+                        Image(systemName: "phone.fill")
+                            .imageScale(.small)
+                            .font(.title)
+                            .foregroundColor(.green)
+                            .frame(width: 28)
+                        
+                        if isEditingPhone {
+                            // Editing mode
+                            TextField("Phone Number", text: $phoneText)
+                                .keyboardType(.phonePad)
+                                .focused($isPhoneFocused)
+                                .font(.subheadline)
+                            
+                            Button("Save") {
+                                savePhone()
+                            }
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.green)
+                            
+                            Button("Cancel") {
+                                cancelPhoneEdit()
+                            }
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        } else {
+                            // Display mode
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Phone")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(user.hasPhone ? user.phone : "Add phone number")
+                                    .font(.subheadline)
+                                    .foregroundColor(user.hasPhone ? .primary : .orange)
+                            }
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                startPhoneEdit(currentPhone: user.phone)
+                            }) {
+                                Image(systemName: user.hasPhone ? "pencil.circle.fill" : "plus.circle.fill")
+                                    .font(.title3)
+                                    .foregroundColor(user.hasPhone ? .blue : .green)
+                            }
+                        }
                     }
                     
-                    // Edit buttons
-                    Button{
-                        newPhoneNumber = user.phone
-                        showPhoneAlert = true
-                    } label: {
-                        TextWithImage(
-                            imageName: user.hasPhone ? "phone.arrow.up.right.fill" : "phone.badge.plus.fill",
-                            title: user.hasPhone ? "Update Phone" : "Add Phone Number",
-                            tintColor: user.hasPhone ? .green : .orange
-                        )
-                    }
-                    
+                    // Change Name
                     Button{
                         newFullName = user.fullname
                         showRenameAlert = true
                     } label: {
                         TextWithImage(imageName: "pencil.circle.fill", title: "Change Name", tintColor: .blue)
                     }
-                    
                 }
                 
-                Section("Payment Methods") {
+                Section {
+                    // Cards List
                     if user.hasCards {
                         ForEach(user.savedCards) { card in
                             Button{
@@ -93,7 +126,6 @@ struct ProfileView: View {
                                                 .fontWeight(.medium)
                                                 .foregroundColor(.primary)
                                             
-                                            Spacer()
                                             if card.isDefault {
                                                 Text("DEFAULT")
                                                     .font(.caption2)
@@ -110,37 +142,80 @@ struct ProfileView: View {
                                             Text(card.maskedNumber)
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
+                                            
                                             Spacer()
+                                            
                                             Text("Expires \(card.expiryDate)")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
                                     }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                             }
                             .buttonStyle(.plain)
                         }
                     } else {
                         HStack {
-                            TextWithImage(imageName: "creditcard.fill", title: "Credit Cards", tintColor: .purple)
-                            Spacer()
+                            Image(systemName: "creditcard.fill")
+                                .foregroundColor(.purple)
+                            
                             Text("No cards saved")
                                 .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Text("Tap + to add")
+                                .font(.caption)
                                 .foregroundColor(.orange)
                         }
                     }
                     
-                    // Add card button
-                    Button{
-                        showAddCardView = true
-                    } label: {
-                        TextWithImage(
-                            imageName: user.canAddMoreCards ? "creditcard.and.123" : "creditcard.trianglebadge.exclamationmark",
-                            title: user.canAddMoreCards ? "Add Credit Card" : "Maximum 3 cards",
-                            tintColor: user.canAddMoreCards ? .purple : .gray
-                        )
+                    // Card limit message
+                    if !user.canAddMoreCards {
+                        HStack {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(.orange)
+                            Text("Maximum 3 cards reached")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                    .disabled(!user.canAddMoreCards)
+                } header: { // Payment Methods Header with Add Button
+                    HStack {
+                        Text("Payment Methods")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        Spacer()
+                        
+                        if user.canAddMoreCards {
+                            Button(action: {
+                                showAddCardView = true
+                            }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.purple)
+                            }
+                        }
+                    }
+                }
+                
+                
+                Section("Reviews") {
+                    HStack {
+                        TextWithImage(imageName: "star.fill", title: "My Reviews", tintColor: .yellow)
+                        Spacer()
+                        Text("Coming Soon")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Section("Account") {
@@ -166,7 +241,6 @@ struct ProfileView: View {
                         Text("Are you sure you want to delete your account? This action cannot be undone.")
                     }
                 }
-                
             }
             .sheet(isPresented: $showAddCardView) {
                 AddCardView()
@@ -194,33 +268,35 @@ struct ProfileView: View {
             } message: {
                 Text("Enter your new name")
             }
-            .alert(user.hasPhone ? "Update Phone Number" : "Add Phone Number", isPresented: $showPhoneAlert) {
-                TextField("Phone Number", text: $newPhoneNumber)
-                    .keyboardType(.phonePad)
-                
-                Button("Cancel", role: .cancel) {
-                    newPhoneNumber = ""
-                }
-                
-                if user.hasPhone {
-                    Button("Remove", role: .destructive) {
-                        Task {
-                            await updatePhoneNumber(phone: "")
-                        }
-                    }
-                }
-                
-                Button("Save") {
-                    Task {
-                        await updatePhoneNumber(phone: newPhoneNumber.trimmingCharacters(in: .whitespaces))
-                    }
-                }
-                .disabled(newPhoneNumber.trimmingCharacters(in: .whitespaces).isEmpty)
-                
-            } message: {
-                Text(user.hasPhone ? "Update your phone number or remove it" : "Add your phone number for easier booking")
+        }
+    }
+    
+    // MARK: - Phone Editing Functions
+    
+    private func startPhoneEdit(currentPhone: String) {
+        phoneText = currentPhone
+        isEditingPhone = true
+        isPhoneFocused = true
+    }
+    
+    private func savePhone() {
+        let trimmedPhone = phoneText.trimmingCharacters(in: .whitespaces)
+        
+        Task {
+            do {
+                try await viewModel.updateUserProfile(fullname: nil, phone: trimmedPhone.isEmpty ? "" : trimmedPhone)
+                isEditingPhone = false
+                phoneText = ""
+            } catch {
+                print("Failed to update phone: \(error.localizedDescription)")
             }
         }
+    }
+    
+    private func cancelPhoneEdit() {
+        isEditingPhone = false
+        phoneText = ""
+        isPhoneFocused = false
     }
     
     // MARK: - Helper Functions
@@ -236,15 +312,5 @@ struct ProfileView: View {
         }
         
         newFullName = ""
-    }
-    
-    private func updatePhoneNumber(phone: String?) async {
-        do {
-            try await viewModel.updateUserProfile(fullname: nil, phone: phone)
-        } catch {
-            print("Failed to update phone: \(error.localizedDescription)")
-        }
-        
-        newPhoneNumber = ""
     }
 }
