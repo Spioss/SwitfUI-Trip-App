@@ -42,6 +42,19 @@ struct TicketCard: View {
                 Text(ticket.bookingReference)
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
                     .foregroundColor(.purple)
+                
+                HStack(spacing: 4) {
+                    Image(systemName: ticket.travelClass.icon)
+                        .font(.caption2)
+                    Text(ticket.travelClass.rawValue)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(ticket.travelClass.color)
+                    .cornerRadius(6)
             }
             
             Spacer()
@@ -63,6 +76,18 @@ struct TicketCard: View {
                 Text(viewModel.formatFlightDate(ticket.flight.outbound.firstSegment.departure.at))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+                if ticket.numberOfTickets > 1 {
+                    HStack(spacing: 4) {
+                    Image(systemName: "ticket.fill")
+                        .font(.caption2)
+                    Text("\(ticket.numberOfTickets) tickets")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                 }
+                .foregroundColor(.purple)
+               }
+            
             }
         }
         .padding(.horizontal, 20)
@@ -120,11 +145,20 @@ struct TicketCard: View {
                 Text("Total Paid")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
-                Text("\(Int(ticket.totalPrice)) \(ticket.flight.currency)")
+                            
+                VStack(alignment: .trailing, spacing: 2) {
+                Text(ticket.formattedPrice)
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
+                                
+                // breakdown if multiple tickets
+                if ticket.numberOfTickets > 1 {
+                    Text("\(ticket.formattedPricePerTicket) × \(ticket.numberOfTickets)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    }
+                }
             }
         }
         .padding(.horizontal, 20)

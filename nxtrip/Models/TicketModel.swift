@@ -18,14 +18,24 @@ struct Booking: Identifiable, Codable {
     let passengerInfo: PassengerInfo
     let paymentInfo: PaymentInfo
     let status: String  // "pending", "confirmed", "cancelled"
+    let numberOfTickets: Int  //
+    let travelClass: TravelClass  //
     
     // Computed properties for backward compatibility
     var totalPrice: Double {
-        flight.price.totalAsDouble
+        flight.totalPriceForTickets(numberOfTickets)
     }
     
     var formattedPrice: String {
-        flight.price.formattedPrice
+        flight.formattedTotalPrice(numberOfTickets: numberOfTickets)
+    }
+    
+    var pricePerTicket: Double {
+        flight.price.totalAsDouble
+    }
+    
+    var formattedPricePerTicket: String {
+        String(format: "%.2f %@", pricePerTicket, flight.currency)
     }
 }
 

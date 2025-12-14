@@ -11,7 +11,7 @@ import Foundation
 class AmadeusService: ObservableObject {
     static let shared = AmadeusService()
     
- 
+
     private let baseURL = "https://test.api.amadeus.com"
     
     private var accessToken: String?

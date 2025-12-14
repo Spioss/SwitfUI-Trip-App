@@ -83,7 +83,7 @@ struct SimpleFlight: Codable, Identifiable {
     var inbound: SimpleItinerary? { itineraries.count > 1 ? itineraries[1] : nil }
     var isRoundTrip: Bool { itineraries.count > 1 }
     
-    // total price for more tickets
+    // Vypočítaná cena pre viacero tikétov
     func totalPriceForTickets(_ numberOfTickets: Int) -> Double {
         return price.totalAsDouble * Double(numberOfTickets)
     }

@@ -34,7 +34,7 @@ class BookingViewModel: ObservableObject {
     
     // MARK: - Booking Function
     
-    func bookFlight(_ flight: SimpleFlight, userId: String) async {
+    func bookFlight(_ flight: SimpleFlight, userId: String, numberOfTickets: Int, travelClass: TravelClass) async {
         guard formIsValid else {
             errorMessage = "Please fill in all required fields"
             return
@@ -54,8 +54,11 @@ class BookingViewModel: ObservableObject {
                 dateOfBirth: dateOfBirth
             )
             
+            // Celková cena = cena letu × počet tikétov
+            let totalAmount = flight.totalPriceForTickets(numberOfTickets)
+            
             let paymentInfo = PaymentInfo(
-                amount: Double(flight.totalPrice) ?? 0.0,
+                amount: totalAmount,
                 cardHolderName: cardHolderName,
                 cardNumber: String(cardNumber.suffix(4)),
                 cardType: selectedCardType.rawValue,
@@ -63,7 +66,7 @@ class BookingViewModel: ObservableObject {
                 paymentDate: Date()
             )
             
-            // Vytvor booking s id: nil
+            // Vytvor booking s numberOfTickets a travelClass
             let booking = Booking(
                 id: nil,
                 userId: userId,
@@ -72,7 +75,9 @@ class BookingViewModel: ObservableObject {
                 flight: flight,
                 passengerInfo: passengerInfo,
                 paymentInfo: paymentInfo,
-                status: "pending"
+                status: "pending",
+                numberOfTickets: numberOfTickets,
+                travelClass: travelClass
             )
             
             // Vytvor nový dokument a nechaj Firestore vygenerovať ID

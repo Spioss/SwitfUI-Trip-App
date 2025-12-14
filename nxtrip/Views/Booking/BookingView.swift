@@ -129,6 +129,9 @@ struct BookingView: View {
             }
             
             VStack(spacing: 16) {
+                // ✅ NEW: Booking Summary Card
+                bookingSummaryCard
+                
                 // Outbound
                 FlightSummary(
                     title: "Outbound Flight",
@@ -157,20 +160,7 @@ struct BookingView: View {
             }
             
             // Price summary
-            VStack(spacing: 8) {
-                HStack {
-                    Text("Total Price")
-                        .font(.headline)
-                    Spacer()
-                    Text(flightViewModel.formatPrice(flight.totalPrice, currency: flight.currency))
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.purple)
-                }
-            }
-            .padding()
-            .background(Color.adaptiveSecondaryBackground)
-            .cornerRadius(12)
+            priceSummaryCard
             
             //checkbox
             VStack(spacing: 12) {
@@ -212,6 +202,100 @@ struct BookingView: View {
         }
     }
     
+    // ✅ NEW: Booking Summary Card
+    private var bookingSummaryCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "ticket.fill")
+                    .foregroundColor(.purple)
+                Text("Booking Summary")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Number of Tickets")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(flightViewModel.numberOfTickets)")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                
+                HStack {
+                    Text("Travel Class")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    HStack(spacing: 6) {
+                        Image(systemName: flightViewModel.travelClass.icon)
+                            .font(.caption)
+                            .foregroundColor(flightViewModel.travelClass.color)
+                        Text(flightViewModel.travelClass.rawValue)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(flightViewModel.travelClass.color)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.purple.opacity(0.1))
+        .cornerRadius(12)
+    }
+    
+    // ✅ UPDATED: Price Summary Card
+    private var priceSummaryCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("Price Breakdown")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Price per ticket")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(flightViewModel.formatPrice(flight.totalPrice, currency: flight.currency, numberOfTickets: 1))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                
+                HStack {
+                    Text("Number of tickets")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("× \(flightViewModel.numberOfTickets)")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                
+                Divider()
+                
+                HStack {
+                    Text("Total Price")
+                        .font(.headline)
+                    Spacer()
+                    Text(flightViewModel.formatPrice(flight.totalPrice, currency: flight.currency, numberOfTickets: flightViewModel.numberOfTickets))
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.purple)
+                }
+            }
+        }
+        .padding()
+        .background(Color.adaptiveSecondaryBackground)
+        .cornerRadius(12)
+    }
+    
     // MARK: - Passenger Info Section (Step 1)
     
     private var passengerInfoSection: some View {
@@ -224,6 +308,20 @@ struct BookingView: View {
                 Text("Enter passenger details")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                
+                // ✅ Info o viacerých tikétoch
+                if flightViewModel.numberOfTickets > 1 {
+                    HStack {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundColor(.blue)
+                        Text("Booking \(flightViewModel.numberOfTickets) tickets - Main passenger details required")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(8)
+                }
             }
             
             VStack(spacing: 16) {
@@ -365,6 +463,36 @@ struct BookingView: View {
             }
             
             VStack(spacing: 16) {
+                // ✅ Booking Info Card
+                ReviewCard(title: "Booking Details") {
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text("Number of Tickets")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(flightViewModel.numberOfTickets)")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        
+                        HStack {
+                            Text("Travel Class")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            HStack(spacing: 4) {
+                                Image(systemName: flightViewModel.travelClass.icon)
+                                    .font(.caption)
+                                Text(flightViewModel.travelClass.rawValue)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(flightViewModel.travelClass.color)
+                        }
+                    }
+                }
+                
                 // Flight summary
                 ReviewCard(title: "Flight") {
                     HStack {
@@ -421,11 +549,15 @@ struct BookingView: View {
                 // Total price
                 VStack(spacing: 8) {
                     HStack {
-                        Text("Total Amount")
-                            .font(.title2)
-                            .fontWeight(.bold)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Total Amount")
+                                .font(.headline)
+                            Text("\(flightViewModel.numberOfTickets) × \(flightViewModel.formatPrice(flight.totalPrice, currency: flight.currency, numberOfTickets: 1))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                         Spacer()
-                        Text(flightViewModel.formatPrice(flight.totalPrice, currency: flight.currency))
+                        Text(flightViewModel.formatPrice(flight.totalPrice, currency: flight.currency, numberOfTickets: flightViewModel.numberOfTickets))
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.purple)
@@ -460,7 +592,12 @@ struct BookingView: View {
                 Button(action: {
                     guard let userId = authViewModel.currentUser?.id else { return }
                     Task {
-                        await bookingViewModel.bookFlight(flight, userId: userId)
+                        await bookingViewModel.bookFlight(
+                            flight,
+                            userId: userId,
+                            numberOfTickets: flightViewModel.numberOfTickets,
+                            travelClass: flightViewModel.travelClass
+                        )
                     }
                 }) {
                     HStack {
@@ -550,4 +687,3 @@ struct BookingView: View {
         return outputFormatter.string(from: date)
     }
 }
-
