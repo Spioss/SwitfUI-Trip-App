@@ -31,6 +31,7 @@ struct TicketOffer: Identifiable, Codable {
     let timeAgo: String // "Just now"
     let createdAt: Date
     let isActive: Bool
+    let originalBookingId: String? // Reference to original booking
     
     // Custom CodingKeys to match Firestore field names
     enum CodingKeys: String, CodingKey {
@@ -55,6 +56,7 @@ struct TicketOffer: Identifiable, Codable {
         case timeAgo = "timeAgo"
         case createdAt = "createdAt"
         case isActive = "isActive"
+        case originalBookingId = "originalBookingId" // NEW
     }
     
     // Computed properties
@@ -89,7 +91,6 @@ struct TicketOffer: Identifiable, Codable {
     var isValidOffer: Bool {
         priceCurrent < priceOriginal && priceCurrent > 0
     }
-
 }
 
 // MARK: - Reason enum for selling

@@ -18,6 +18,13 @@ struct CreateOfferView: View {
     @State private var selectedReason: SellReason = .illness
     @State private var isCreating = false
     
+    // ✅ NEW: Computed property to filter only upcoming tickets
+    private var upcomingBookings: [Booking] {
+        ticketViewModel.bookedTickets.filter { booking in
+            ticketViewModel.isUpcoming(booking.flight.outbound.firstSegment.departure.at)
+        }
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -76,11 +83,21 @@ struct CreateOfferView: View {
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                InstructionRow(number: "1", text: "Select your booked ticket")
+                InstructionRow(number: "1", text: "Select your upcoming ticket")
                 InstructionRow(number: "2", text: "Set a new price (must be lower)")
                 InstructionRow(number: "3", text: "Choose reason for selling")
                 InstructionRow(number: "4", text: "Create offer and wait for buyers")
             }
+            
+            // ✅ NEW: Important note about upcoming tickets only
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                Text("Only upcoming flights can be sold")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+            }
+            .padding(.top, 8)
         }
         .padding()
         .background(Color.blue.opacity(0.1))
@@ -91,11 +108,27 @@ struct CreateOfferView: View {
     
     private var selectBookingSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Select Ticket to Sell")
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack {
+                Text("Select Ticket to Sell")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                // ✅ NEW: Counter badge
+                if !upcomingBookings.isEmpty {
+                    Text("\(upcomingBookings.count)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green)
+                        .cornerRadius(12)
+                }
+            }
             
-            if ticketViewModel.bookedTickets.isEmpty {
+            if upcomingBookings.isEmpty {
                 emptyTicketsView
             } else {
                 bookingsList
@@ -109,13 +142,15 @@ struct CreateOfferView: View {
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
             
-            Text("No tickets available")
+            Text("No upcoming tickets")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
-            Text("Book a flight first to sell your tickets")
+            // ✅ NEW: Better empty state message
+            Text("You can only sell tickets for flights that haven't departed yet")
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding()
@@ -125,7 +160,8 @@ struct CreateOfferView: View {
     
     private var bookingsList: some View {
         VStack(spacing: 12) {
-            ForEach(ticketViewModel.bookedTickets) { booking in
+            // ✅ CHANGED: Use upcomingBookings instead of all bookings
+            ForEach(upcomingBookings) { booking in
                 Button {
                     selectedBooking = booking
                     // Set initial price to 80% of original
@@ -134,7 +170,8 @@ struct CreateOfferView: View {
                 } label: {
                     BookingSelectCard(
                         booking: booking,
-                        isSelected: selectedBooking?.id == booking.id
+                        isSelected: selectedBooking?.id == booking.id,
+                        flightStatus: ticketViewModel.getFlightStatus(booking.flight.outbound.firstSegment.departure.at)
                     )
                 }
                 .buttonStyle(.plain)
@@ -363,7 +400,8 @@ struct CreateOfferView: View {
     private func createOffer(booking: Booking) async {
         guard let userId = authViewModel.currentUser?.id,
               let userName = authViewModel.currentUser?.fullname,
-              let price = Double(newPrice) else {
+              let price = Double(newPrice),
+              let bookingId = booking.id else {
             return
         }
         
@@ -421,16 +459,34 @@ struct InstructionRow: View {
     }
 }
 
+// ✅ UPDATED: BookingSelectCard with flight status
 struct BookingSelectCard: View {
     let booking: Booking
     let isSelected: Bool
+    let flightStatus: FlightStatus
     
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(booking.flight.outbound.firstSegment.departure.iataCode) → \(booking.flight.outbound.lastSegment.arrival.iataCode)")
-                    .font(.headline)
-                    .fontWeight(.bold)
+                HStack {
+                    Text("\(booking.flight.outbound.firstSegment.departure.iataCode) → \(booking.flight.outbound.lastSegment.arrival.iataCode)")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    
+                    // Flight status badge
+                    HStack(spacing: 4) {
+                        Image(systemName: flightStatus.icon)
+                            .font(.caption2)
+                        Text(flightStatus.text)
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(flightStatus.color)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(flightStatus.color.opacity(0.1))
+                    .cornerRadius(4)
+                }
                 
                 Text("Ref: \(booking.bookingReference)")
                     .font(.caption)

@@ -6,13 +6,17 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct OfferDetailView: View {
     let offer: TicketOffer
     @EnvironmentObject var viewModel: SaveTheTicketViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
+    
     @State private var showDeleteAlert = false
+    @State private var showPurchaseView = false
+    @State private var originalBookingId: String = ""
     
     private var isMyOffer: Bool {
         offer.sellerId == authViewModel.currentUser?.id
@@ -70,6 +74,35 @@ struct OfferDetailView: View {
                 }
             } message: {
                 Text("Are you sure you want to delete this offer? This action cannot be undone.")
+            }
+            .sheet(isPresented: $showPurchaseView) {
+                SecondHandPurchaseView(
+                    offer: offer,
+                    originalBookingId: originalBookingId
+                )
+                .environmentObject(authViewModel)
+            }
+            .onAppear {
+                loadOriginalBookingId()
+            }
+        }
+    }
+    
+    // MARK: - Load Original Booking ID
+    
+    private func loadOriginalBookingId() {
+        Task {
+            do {
+                guard let offerId = offer.id else { return }
+                let doc = try await Firestore.firestore().collection("ticketOffers").document(offerId).getDocument()
+                if let bookingId = doc.data()?["originalBookingId"] as? String {
+                    originalBookingId = bookingId
+                    print("✅ Loaded booking ID: \(bookingId)")
+                } else {
+                    print("⚠️ No originalBookingId found for offer")
+                }
+            } catch {
+                print("❌ Error loading booking ID: \(error)")
             }
         }
     }
@@ -394,24 +427,13 @@ struct OfferDetailView: View {
     private var buyerActions: some View {
         VStack(spacing: 12) {
             if offer.isActive {
+                // ✅ NEW: Buy Now button triggers purchase flow
                 Button(action: {
-                    // Contact seller
-                    print("Contact seller tapped")
-                }) {
-                    HStack {
-                        Image(systemName: "message.fill")
-                        Text("Contact Seller")
-                            .fontWeight(.semibold)
+                    if !originalBookingId.isEmpty {
+                        showPurchaseView = true
+                    } else {
+                        print("⚠️ Booking ID not loaded yet")
                     }
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(Color.purple)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                }
-                
-                Button(action: {
-                    // Buy now
-                    print("Buy now tapped")
                 }) {
                     HStack {
                         Image(systemName: "cart.fill")
@@ -419,10 +441,24 @@ struct OfferDetailView: View {
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(Color.green)
+                    .background(originalBookingId.isEmpty ? Color.gray : Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 }
+                .disabled(originalBookingId.isEmpty)
+                
+                // Contact seller info
+                HStack {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(.blue)
+                    Text("Secure payment - Your money is protected")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+                .padding()
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(8)
+                
             } else {
                 HStack {
                     Image(systemName: "exclamationmark.circle.fill")
@@ -466,26 +502,6 @@ struct OfferDetailView: View {
         case "purple": return .purple
         case "gray": return .gray
         default: return .gray
-        }
-    }
-}
-
-// MARK: - Detail Row Component (reuse if needed)
-struct OfferDetailRow: View {
-    let label: String
-    let value: String
-    
-    var body: some View {
-        HStack {
-            Text(label)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Spacer()
-            
-            Text(value)
-                .font(.subheadline)
-                .fontWeight(.medium)
         }
     }
 }

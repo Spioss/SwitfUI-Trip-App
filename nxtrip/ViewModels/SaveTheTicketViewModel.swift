@@ -40,18 +40,18 @@ class SaveTheTicketViewModel: ObservableObject {
                 do {
                     let offer = try document.data(as: TicketOffer.self)
                     fetchedOffers.append(offer)
-                    print("Decoded offer: \(offer.route) - \(offer.formattedCurrentPrice)")
+                    print("✅ Decoded offer: \(offer.route) - \(offer.formattedCurrentPrice)")
                 } catch {
-                    print("Error decoding offer \(document.documentID): \(error)")
+                    print("❌ Error decoding offer \(document.documentID): \(error)")
                 }
             }
             
             self.offers = fetchedOffers
-            print("Total offers loaded: \(fetchedOffers.count)")
+            print("📊 Total offers loaded: \(fetchedOffers.count)")
             
         } catch {
             errorMessage = "Failed to fetch offers: \(error.localizedDescription)"
-            print("Fetch error: \(error)")
+            print("❌ Fetch error: \(error)")
         }
         
         isLoading = false
@@ -60,7 +60,7 @@ class SaveTheTicketViewModel: ObservableObject {
     // MARK: - Fetch My Offers
     
     func fetchMyOffers(userId: String) async {
-        print("Fetching offers for user: \(userId)")
+        print("🔍 Fetching offers for user: \(userId)")
         
         do {
             let querySnapshot = try await db.collection("ticketOffers")
@@ -75,15 +75,15 @@ class SaveTheTicketViewModel: ObservableObject {
                     let offer = try document.data(as: TicketOffer.self)
                     fetchedOffers.append(offer)
                 } catch {
-                    print("Error decoding my offer: \(error)")
+                    print("❌ Error decoding my offer: \(error)")
                 }
             }
             
             self.myOffers = fetchedOffers
-            print("My offers loaded: \(fetchedOffers.count)")
+            print("📊 My offers loaded: \(fetchedOffers.count)")
             
         } catch {
-            print("Error fetching my offers: \(error)")
+            print("❌ Error fetching my offers: \(error)")
         }
     }
     
@@ -108,6 +108,9 @@ class SaveTheTicketViewModel: ObservableObject {
         
         let discountPercent = Int(((booking.totalPrice - newPrice) / booking.totalPrice) * 100)
         
+        let formattedDate = formatDateForOffer(booking.flight.outbound.firstSegment.departure.at)
+        print("📅 Formatted date: \(formattedDate)")
+        
         let offer = TicketOffer(
             id: nil,
             sellerId: userId,
@@ -117,11 +120,11 @@ class SaveTheTicketViewModel: ObservableObject {
             fromCity: getCityName(booking.flight.outbound.firstSegment.departure.iataCode),
             toCode: booking.flight.outbound.lastSegment.arrival.iataCode,
             toCity: getCityName(booking.flight.outbound.lastSegment.arrival.iataCode),
-            date: formatDateForOffer(booking.flight.outbound.firstSegment.departure.at),
+            date: formattedDate,
             departureTime: formatTimeForOffer(booking.flight.outbound.firstSegment.departure.at),
             airline: getAirlineName(booking.flight.outbound.firstSegment.carrierCode),
             flightNumber: booking.flight.outbound.firstSegment.number,
-            seat: "ECONOMY", // Default
+            seat: booking.travelClass.rawValue,
             isInternational: false,
             priceOriginal: booking.totalPrice,
             priceCurrent: newPrice,
@@ -129,21 +132,22 @@ class SaveTheTicketViewModel: ObservableObject {
             reason: reason.rawValue,
             timeAgo: "Just now",
             createdAt: Date(),
-            isActive: true
+            isActive: true,
+            originalBookingId: booking.id
         )
         
         do {
             let docRef = db.collection("ticketOffers").document()
             try docRef.setData(from: offer)
             
-            print("Offer created successfully: \(offer.route)")
+            print("✅ Offer created successfully: \(offer.route) on \(offer.date)")
             
             // Refresh offers
             await fetchAllOffers()
             
         } catch {
             errorMessage = "Failed to create offer: \(error.localizedDescription)"
-            print("Create offer error: \(error)")
+            print("❌ Create offer error: \(error)")
             throw error
         }
         
@@ -160,11 +164,11 @@ class SaveTheTicketViewModel: ObservableObject {
             offers.removeAll { $0.id == offerId }
             myOffers.removeAll { $0.id == offerId }
             
-            print("Offer deleted: \(offerId)")
+            print("✅ Offer deleted: \(offerId)")
             
         } catch {
             errorMessage = "Failed to delete offer: \(error.localizedDescription)"
-            print("Delete error: \(error)")
+            print("❌ Delete error: \(error)")
         }
     }
     
@@ -182,7 +186,6 @@ class SaveTheTicketViewModel: ObservableObject {
             // Update in myOffers
             if let index = myOffers.firstIndex(where: { $0.id == offerId }) {
                 let updatedOffer = myOffers[index]
-                // Create new offer with isActive = false
                 myOffers[index] = TicketOffer(
                     id: updatedOffer.id,
                     sellerId: updatedOffer.sellerId,
@@ -204,44 +207,69 @@ class SaveTheTicketViewModel: ObservableObject {
                     reason: updatedOffer.reason,
                     timeAgo: updatedOffer.timeAgo,
                     createdAt: updatedOffer.createdAt,
-                    isActive: false
+                    isActive: false,
+                    originalBookingId: updatedOffer.originalBookingId
                 )
             }
             
-            print("Offer deactivated: \(offerId)")
+            print("✅ Offer deactivated: \(offerId)")
             
         } catch {
             errorMessage = "Failed to deactivate offer: \(error.localizedDescription)"
-            print("Deactivate error: \(error)")
+            print("❌ Deactivate error: \(error)")
         }
     }
     
     // MARK: - Helper Functions
     
+    // date formatting method
     private func formatDateForOffer(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else {
+        // Input format: "2025-12-17T10:30:00" (without timezone)
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        guard let date = inputFormatter.date(from: isoString) else {
+            print("⚠️ Failed to parse date: \(isoString)")
             return isoString
         }
         
+        // Output format: "Dec 17, 2025"
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "MMM d, yyyy"
-        return outputFormatter.string(from: date)
+        outputFormatter.locale = Locale(identifier: "en_US")
+        
+        let formatted = outputFormatter.string(from: date)
+        print("📅 Date formatting: \(isoString) -> \(formatted)")
+        
+        return formatted
     }
     
     private func formatTimeForOffer(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else {
-            // Fallback regex
+        // Input format: "2025-12-17T10:30:00"
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        guard let date = inputFormatter.date(from: isoString) else {
+            print("⚠️ Failed to parse time: \(isoString)")
+            // Fallback: try to extract time with regex
             if let timeMatch = isoString.range(of: #"T(\d{2}:\d{2})"#, options: .regularExpression) {
-                return String(isoString[timeMatch]).replacingOccurrences(of: "T", with: "")
+                let timeString = String(isoString[timeMatch]).replacingOccurrences(of: "T", with: "")
+                print("📅 Time extracted via regex: \(timeString)")
+                return timeString
             }
             return isoString
         }
         
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "HH:mm"
-        return outputFormatter.string(from: date)
+        outputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        let formatted = outputFormatter.string(from: date)
+        print("⏰ Time formatting: \(isoString) -> \(formatted)")
+        
+        return formatted
     }
     
     private func getCityName(_ iataCode: String) -> String {
@@ -286,5 +314,4 @@ class SaveTheTicketViewModel: ObservableObject {
         ]
         return airlines[code] ?? code
     }
-
 }
