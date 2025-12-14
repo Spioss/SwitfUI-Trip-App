@@ -3,6 +3,7 @@
 //  nxtrip
 //
 //  Created by Lukáš Mader on 14/12/2025.
+//  Updated to use actual selected dates
 //
 
 import Foundation
@@ -11,12 +12,21 @@ struct MockFlightData {
     
     // MARK: - Generate Mock Flights
     
-    static func generateMockFlights(from: String, to: String, isRoundTrip: Bool, travelClass: TravelClass = .economy) -> [SimpleFlight] {
+    static func generateMockFlights(
+        from: String,
+        to: String,
+        departureDate: Date,
+        returnDate: Date?,
+        isRoundTrip: Bool,
+        travelClass: TravelClass = .economy
+    ) -> [SimpleFlight] {
         let priceMultiplier = getPriceMultiplier(for: travelClass)
         
         let flights = [
             createMockFlight(
                 from: from, to: to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 departureTime: "08:30", arrivalTime: "10:45",
                 carrier: "VY", number: "8715",
                 duration: "PT2H15M",
@@ -27,6 +37,8 @@ struct MockFlightData {
             ),
             createMockFlight(
                 from: from, to: to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 departureTime: "12:15", arrivalTime: "15:30",
                 carrier: "FR", number: "2341",
                 duration: "PT3H15M",
@@ -37,6 +49,8 @@ struct MockFlightData {
             ),
             createMockFlight(
                 from: from, to: to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 departureTime: "16:45", arrivalTime: "18:20",
                 carrier: "BA", number: "847",
                 duration: "PT1H35M",
@@ -47,6 +61,8 @@ struct MockFlightData {
             ),
             createMockFlight(
                 from: from, to: to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 departureTime: "19:30", arrivalTime: "22:45",
                 carrier: "LH", number: "1234",
                 duration: "PT3H15M",
@@ -57,6 +73,8 @@ struct MockFlightData {
             ),
             createMockFlight(
                 from: from, to: to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 departureTime: "06:00", arrivalTime: "08:15",
                 carrier: "AF", number: "5678",
                 duration: "PT2H15M",
@@ -90,6 +108,8 @@ struct MockFlightData {
     private static func createMockFlight(
         from: String,
         to: String,
+        departureDate: Date,
+        returnDate: Date?,
         departureTime: String,
         arrivalTime: String,
         carrier: String,
@@ -102,9 +122,6 @@ struct MockFlightData {
     ) -> SimpleFlight {
         
         let finalPrice = basePrice * priceMultiplier
-        
-        let departureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
-        let returnDate = Calendar.current.date(byAdding: .day, value: 14, to: Date()) ?? Date()
         
         // Outbound itinerary
         let outboundDeparture = formatDateForAPI(departureDate, time: departureTime)
@@ -152,7 +169,7 @@ struct MockFlightData {
         // Return itinerary (if round trip)
         var itineraries = [outbound]
         
-        if hasReturn {
+        if hasReturn, let returnDate = returnDate {
             let returnDeparture = formatDateForAPI(returnDate, time: departureTime)
             let returnArrival = formatDateForAPI(returnDate, time: arrivalTime)
             

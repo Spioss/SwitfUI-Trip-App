@@ -427,7 +427,7 @@ struct OfferDetailView: View {
     private var buyerActions: some View {
         VStack(spacing: 12) {
             if offer.isActive {
-                // ✅ NEW: Buy Now button triggers purchase flow
+                // Buy Now button
                 Button(action: {
                     if !originalBookingId.isEmpty {
                         showPurchaseView = true

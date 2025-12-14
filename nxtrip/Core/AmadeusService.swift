@@ -71,13 +71,25 @@ class AmadeusService: ObservableObject {
     
     func searchFlights(request: FlightSearchRequest) async throws -> [SimpleFlight] {
         
-        // 🔧 Force mock data if enabled
+        // Parse dates from string to Date for mock data
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let departureDate = dateFormatter.date(from: request.departureDate) else {
+            throw FlightError.invalidResponse
+        }
+        
+        let returnDate = request.returnDate != nil ? dateFormatter.date(from: request.returnDate!) : nil
+        
+        // Force mock data if enabled
         if forceMockData {
             print("🎭 Using MOCK data (forced)")
             try? await Task.sleep(nanoseconds: 500_000_000) // Simulate API delay
             return MockFlightData.generateMockFlights(
                 from: request.from,
                 to: request.to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 isRoundTrip: request.returnDate != nil,
                 travelClass: request.travelClass
             )
@@ -90,10 +102,12 @@ class AmadeusService: ObservableObject {
             print("⚠️ Amadeus API failed: \(error.localizedDescription)")
             print("🎭 Falling back to MOCK data")
             
-            // Fallback to mock data
+            // Pass actual dates to mock data
             return MockFlightData.generateMockFlights(
                 from: request.from,
                 to: request.to,
+                departureDate: departureDate,
+                returnDate: returnDate,
                 isRoundTrip: request.returnDate != nil,
                 travelClass: request.travelClass
             )

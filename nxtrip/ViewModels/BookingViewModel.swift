@@ -57,10 +57,14 @@ class BookingViewModel: ObservableObject {
             // Celková cena = cena letu × počet tikétov
             let totalAmount = flight.totalPriceForTickets(numberOfTickets)
             
+            // ✅ Extract real last 4 digits from card number (remove spaces and asterisks)
+            let cleanCardNumber = cardNumber.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "*", with: "")
+            let last4 = String(cleanCardNumber.suffix(4))
+            
             let paymentInfo = PaymentInfo(
                 amount: totalAmount,
                 cardHolderName: cardHolderName,
-                cardNumber: String(cardNumber.suffix(4)),
+                cardNumber: last4,
                 cardType: selectedCardType.rawValue,
                 currency: flight.currency,
                 paymentDate: Date()
@@ -141,13 +145,13 @@ class BookingViewModel: ObservableObject {
         email.contains("@") &&
         !phone.isEmpty &&
         !cardNumber.isEmpty &&
-        cardNumber.replacingOccurrences(of: " ", with: "").count >= 16 &&
+        cardNumber.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "*", with: "").count >= 4 &&
         !expiryDate.isEmpty &&
         !cvv.isEmpty &&
         !cardHolderName.isEmpty
     }
     
-    // Auto-fill user data
+    // ✅ UPDATED: Auto-fill user data with complete card details (except CVV)
     func prefillUserData(fullname: String, email: String, phone: String = "", defaultCard: SavedCreditCard? = nil) {
         if firstName.isEmpty {
             let nameParts = fullname.split(separator: " ")
@@ -168,17 +172,21 @@ class BookingViewModel: ObservableObject {
             self.phone = phone
         }
         
-        // default card if exists
+        // ✅ NEW: Auto-fill complete card details (except CVV for security)
         if let card = defaultCard {
             if cardHolderName.isEmpty {
                 cardHolderName = card.cardHolderName
             }
             if cardNumber.isEmpty {
+                // Fill masked card number with last 4 digits
+                cardNumber = "**** **** **** \(card.last4Digits)"
                 selectedCardType = card.cardType
             }
             if expiryDate.isEmpty {
                 expiryDate = card.expiryDate
             }
+            // ⚠️ CVV is intentionally NOT pre-filled for security reasons
+            // User must always enter CVV manually
         }
     }
     

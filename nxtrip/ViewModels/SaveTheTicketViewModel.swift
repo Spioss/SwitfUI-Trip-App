@@ -164,11 +164,11 @@ class SaveTheTicketViewModel: ObservableObject {
             offers.removeAll { $0.id == offerId }
             myOffers.removeAll { $0.id == offerId }
             
-            print("✅ Offer deleted: \(offerId)")
+            print("Offer deleted: \(offerId)")
             
         } catch {
             errorMessage = "Failed to delete offer: \(error.localizedDescription)"
-            print("❌ Delete error: \(error)")
+            print("Delete error: \(error)")
         }
     }
     
@@ -212,11 +212,11 @@ class SaveTheTicketViewModel: ObservableObject {
                 )
             }
             
-            print("✅ Offer deactivated: \(offerId)")
+            print("Offer deactivated: \(offerId)")
             
         } catch {
             errorMessage = "Failed to deactivate offer: \(error.localizedDescription)"
-            print("❌ Deactivate error: \(error)")
+            print("Deactivate error: \(error)")
         }
     }
     
