@@ -89,6 +89,7 @@ struct TicketOffer: Identifiable, Codable {
     var isValidOffer: Bool {
         priceCurrent < priceOriginal && priceCurrent > 0
     }
+
 }
 
 // MARK: - Reason enum for selling

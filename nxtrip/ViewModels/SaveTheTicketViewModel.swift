@@ -122,10 +122,7 @@ class SaveTheTicketViewModel: ObservableObject {
             airline: getAirlineName(booking.flight.outbound.firstSegment.carrierCode),
             flightNumber: booking.flight.outbound.firstSegment.number,
             seat: "ECONOMY", // Default
-            isInternational: isInternationalFlight(
-                from: booking.flight.outbound.firstSegment.departure.iataCode,
-                to: booking.flight.outbound.lastSegment.arrival.iataCode
-            ),
+            isInternational: false,
             priceOriginal: booking.totalPrice,
             priceCurrent: newPrice,
             discountPercent: discountPercent,
@@ -137,7 +134,7 @@ class SaveTheTicketViewModel: ObservableObject {
         
         do {
             let docRef = db.collection("ticketOffers").document()
-            try await docRef.setData(from: offer)
+            try docRef.setData(from: offer)
             
             print("Offer created successfully: \(offer.route)")
             
@@ -255,7 +252,19 @@ class SaveTheTicketViewModel: ObservableObject {
             "PRG": "Prague",
             "LHR": "London",
             "CDG": "Paris",
-            // Add more as needed
+            "BER": "Berlin",
+            "MUC": "Munich",
+            "FRA": "Frankfurt",
+            "AMS": "Amsterdam",
+            "FCO": "Rome",
+            "MAD": "Madrid",
+            "LIS": "Lisbon",
+            "DUB": "Dublin",
+            "CPH": "Copenhagen",
+            "OSL": "Oslo",
+            "STO": "Stockholm",
+            "WAW": "Warsaw",
+            "BUD": "Budapest"
         ]
         return cities[iataCode] ?? iataCode
     }
@@ -266,16 +275,16 @@ class SaveTheTicketViewModel: ObservableObject {
             "FR": "Ryanair",
             "BA": "British Airways",
             "LH": "Lufthansa",
-            // Add more as needed
+            "DY": "Norwegian",
+            "U2": "easyJet",
+            "W6": "Wizz Air",
+            "OS": "Austrian Airlines",
+            "KL": "KLM",
+            "AF": "Air France",
+            "IB": "Iberia",
+            "TP": "TAP Portugal"
         ]
         return airlines[code] ?? code
     }
-    
-    private func isInternationalFlight(from: String, to: String) -> Bool {
-        let slovakAirports = ["BTS"]
-        let fromIsSlovak = slovakAirports.contains(from)
-        let toIsSlovak = slovakAirports.contains(to)
-        
-        return fromIsSlovak != toIsSlovak // One is Slovak, one isn't
-    }
+
 }

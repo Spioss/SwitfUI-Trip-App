@@ -11,14 +11,19 @@ import Foundation
 class AmadeusService: ObservableObject {
     static let shared = AmadeusService()
     
+
     private let baseURL = "https://test.api.amadeus.com"
     
     private var accessToken: String?
     private var tokenExpiry: Date?
     
+    // 🔧 Debug mode - set to true to always use mock data
+    private let forceMockData = false
+    
     private init() {}
     
-    // Authetication
+    // MARK: - Authentication
+    
     private func getToken() async throws -> String {
         if let token = accessToken, let expiry = tokenExpiry, expiry > Date() {
             return token
@@ -41,7 +46,8 @@ class AmadeusService: ObservableObject {
         return tokenResponse.accessToken
     }
     
-    // searchAirports
+    // MARK: - Search Airports
+    
     func searchAirports(keyword: String) async throws -> [SimpleAirport] {
         let token = try await getToken()
         
@@ -62,8 +68,40 @@ class AmadeusService: ObservableObject {
         return response.data
     }
     
-    // searchFlights
+    // MARK: - Search Flights (with Mock Fallback)
+    
     func searchFlights(request: FlightSearchRequest) async throws -> [SimpleFlight] {
+        
+        // 🔧 Force mock data if enabled
+        if forceMockData {
+            print("🎭 Using MOCK data (forced)")
+            try? await Task.sleep(nanoseconds: 500_000_000) // Simulate API delay
+            return MockFlightData.generateMockFlights(
+                from: request.from,
+                to: request.to,
+                isRoundTrip: request.returnDate != nil
+            )
+        }
+        
+        // Try real API first
+        do {
+            return try await fetchRealFlights(request: request)
+        } catch {
+            print("⚠️ Amadeus API failed: \(error.localizedDescription)")
+            print("🎭 Falling back to MOCK data")
+            
+            // Fallback to mock data
+            return MockFlightData.generateMockFlights(
+                from: request.from,
+                to: request.to,
+                isRoundTrip: request.returnDate != nil
+            )
+        }
+    }
+    
+    // MARK: - Fetch Real Flights from API
+    
+    private func fetchRealFlights(request: FlightSearchRequest) async throws -> [SimpleFlight] {
         let token = try await getToken()
         
         var components = URLComponents(string: "\(baseURL)/v2/shopping/flight-offers")!
@@ -83,15 +121,37 @@ class AmadeusService: ObservableObject {
         
         var urlRequest = URLRequest(url: components.url!)
         urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.timeoutInterval = 10 // ⏱️ Shorter timeout to fail fast
         
-        let (data, _) = try await URLSession.shared.data(for: urlRequest)
-        let response = try JSONDecoder().decode(FlightSearchResponse.self, from: data)
+        print("🔍 Amadeus API Request: \(components.url?.absoluteString ?? "N/A")")
         
-        return response.data
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw FlightError.networkError
+        }
+        
+        print("📡 HTTP Status: \(httpResponse.statusCode)")
+        
+        guard httpResponse.statusCode == 200 else {
+            print("❌ API returned error code: \(httpResponse.statusCode)")
+            if let errorString = String(data: data, encoding: .utf8) {
+                print("Response: \(errorString.prefix(200))")
+            }
+            throw FlightError.invalidResponse
+        }
+        
+        let decoder = JSONDecoder()
+        let flightResponse = try decoder.decode(FlightSearchResponse.self, from: data)
+        
+        print("✅ Successfully fetched \(flightResponse.data.count) flights from API")
+        
+        return flightResponse.data
     }
 }
 
-// enum type for errors
+// MARK: - Error Types
+
 enum FlightError: Error {
     case noToken
     case invalidResponse
