@@ -11,7 +11,7 @@ import Foundation
 class AmadeusService: ObservableObject {
     static let shared = AmadeusService()
     
-
+ 
     private let baseURL = "https://test.api.amadeus.com"
     
     private var accessToken: String?
@@ -79,7 +79,8 @@ class AmadeusService: ObservableObject {
             return MockFlightData.generateMockFlights(
                 from: request.from,
                 to: request.to,
-                isRoundTrip: request.returnDate != nil
+                isRoundTrip: request.returnDate != nil,
+                travelClass: request.travelClass
             )
         }
         
@@ -94,7 +95,8 @@ class AmadeusService: ObservableObject {
             return MockFlightData.generateMockFlights(
                 from: request.from,
                 to: request.to,
-                isRoundTrip: request.returnDate != nil
+                isRoundTrip: request.returnDate != nil,
+                travelClass: request.travelClass
             )
         }
     }
@@ -109,7 +111,8 @@ class AmadeusService: ObservableObject {
             URLQueryItem(name: "originLocationCode", value: request.from),
             URLQueryItem(name: "destinationLocationCode", value: request.to),
             URLQueryItem(name: "departureDate", value: request.departureDate),
-            URLQueryItem(name: "adults", value: String(request.adults)),
+            URLQueryItem(name: "adults", value: String(request.numberOfTickets)),
+            URLQueryItem(name: "travelClass", value: request.travelClass.apiCode),
             URLQueryItem(name: "max", value: "10")
         ]
         

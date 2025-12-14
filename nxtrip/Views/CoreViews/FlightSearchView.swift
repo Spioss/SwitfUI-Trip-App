@@ -45,7 +45,7 @@ struct FlightSearchView: View {
                                 selectedFlight = flight
                                 showBookingView = true
                             }) {
-                                FlightCard(flight: flight)
+                                FlightCard(flight: flight, numberOfTickets: viewModel.numberOfTickets)
                                     .environmentObject(viewModel)
                             }
                             .buttonStyle(.plain)
@@ -151,24 +151,50 @@ struct FlightSearchView: View {
             .background(Color.adaptiveSecondaryBackground)
             .cornerRadius(12)
             
-            // Number of passangers
-            VStack{
-                CustomStepper (
-                    title: "Adults:",
-                    value: $viewModel.adults,
-                    range: 1...9
-                )
-                CustomStepper (
-                    title: "Kids:",
-                    value: $viewModel.kids,
+            // Number of tickets
+            VStack(spacing: 0) {
+                CustomStepper(
+                    title: "Number of Tickets:",
+                    value: $viewModel.numberOfTickets,
                     range: 1...9
                 )
             }
             .background(Color.adaptiveSecondaryBackground)
             .cornerRadius(12)
             
+            // Travel Class Selector
+            travelClassSelector
+            
         }
         .padding(.horizontal)
+    }
+    
+    private var travelClassSelector: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Travel Class")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .padding(.horizontal, 16)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(TravelClass.allCases, id: \.self) { travelClass in
+                        TravelClassCard(
+                            travelClass: travelClass,
+                            isSelected: viewModel.travelClass == travelClass
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                viewModel.travelClass = travelClass
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .padding(.vertical, 12)
+        .background(Color.adaptiveSecondaryBackground)
+        .cornerRadius(12)
     }
     
     private var searchButton: some View {
@@ -183,5 +209,40 @@ struct FlightSearchView: View {
         .font(.system(size: 16, weight: .semibold))
         .foregroundColor(Color.adaptiveBackground)
         .disabled(viewModel.fromAirport == nil || viewModel.toAirport == nil)
+    }
+}
+
+// MARK: - Travel Class Card Component
+
+struct TravelClassCard: View {
+    let travelClass: TravelClass
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: travelClass.icon)
+                    .font(.system(size: 24))
+                    .foregroundColor(isSelected ? .white : travelClass.color)
+                
+                Text(travelClass.rawValue)
+                    .font(.caption)
+                    .fontWeight(isSelected ? .semibold : .regular)
+                    .foregroundColor(isSelected ? .white : .primary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(width: 100, height: 90)
+            .background(isSelected ? travelClass.color : Color.adaptiveInputBackground)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? travelClass.color : Color.adaptiveBorder, lineWidth: isSelected ? 2 : 0.5)
+            )
+            .shadow(color: isSelected ? travelClass.color.opacity(0.3) : .clear, radius: 8, x: 0, y: 4)
+        }
+        .buttonStyle(.plain)
     }
 }

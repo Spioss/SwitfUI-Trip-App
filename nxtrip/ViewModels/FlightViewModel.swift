@@ -22,8 +22,8 @@ class FlightViewModel: ObservableObject {
     @Published var departureDate = Date()
     @Published var returnDate = Date().addingTimeInterval(7*24*3600)
     @Published var isRoundTrip = false
-    @Published var adults = 1
-    @Published var kids = 1
+    @Published var numberOfTickets = 1
+    @Published var travelClass: TravelClass = .economy
     
     private let service = AmadeusService.shared
     
@@ -73,15 +73,15 @@ class FlightViewModel: ObservableObject {
         }
         
         isLoading = true
-        searchStatus = "Searching flights from \(from) to \(to)"
+        searchStatus = "Searching \(travelClass.rawValue) flights from \(from) to \(to) for \(numberOfTickets) ticket(s)"
         
         let request = FlightSearchRequest(
             from: from,
             to: to,
             departureDate: formatDate(departureDate),
             returnDate: isRoundTrip ? formatDate(returnDate) : nil,
-            adults: adults,
-            kids: kids
+            numberOfTickets: numberOfTickets,
+            travelClass: travelClass
         )
     
         
@@ -166,9 +166,10 @@ class FlightViewModel: ObservableObject {
         return finalResult
     }
     
-    func formatPrice(_ price: String, currency: String) -> String {
+    func formatPrice(_ price: String, currency: String, numberOfTickets: Int = 1) -> String {
         guard let amount = Double(price) else { return "\(price) \(currency)" }
-        return String(format: "%.0f %@", amount, currency)
+        let totalAmount = amount * Double(numberOfTickets)
+        return String(format: "%.0f %@", totalAmount, currency)
     }
     
     // MARK: - Actions
@@ -207,7 +208,7 @@ class FlightViewModel: ObservableObject {
             "Milan", "MXP",
             "Berlin", "BER",
             "Warsaw", "WAW",
-            "Budapest", "BUD", 
+            "Budapest", "BUD",
             "Istanbul", "IST",
             "Dubai", "DXB"
         ]

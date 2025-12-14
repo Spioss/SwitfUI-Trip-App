@@ -11,56 +11,78 @@ struct MockFlightData {
     
     // MARK: - Generate Mock Flights
     
-    static func generateMockFlights(from: String, to: String, isRoundTrip: Bool) -> [SimpleFlight] {
+    static func generateMockFlights(from: String, to: String, isRoundTrip: Bool, travelClass: TravelClass = .economy) -> [SimpleFlight] {
+        let priceMultiplier = getPriceMultiplier(for: travelClass)
+        
         let flights = [
             createMockFlight(
                 from: from, to: to,
                 departureTime: "08:30", arrivalTime: "10:45",
                 carrier: "VY", number: "8715",
                 duration: "PT2H15M",
-                price: 89.99,
+                basePrice: 89.99,
                 stops: 0,
-                hasReturn: isRoundTrip
+                hasReturn: isRoundTrip,
+                priceMultiplier: priceMultiplier
             ),
             createMockFlight(
                 from: from, to: to,
                 departureTime: "12:15", arrivalTime: "15:30",
                 carrier: "FR", number: "2341",
                 duration: "PT3H15M",
-                price: 65.50,
+                basePrice: 65.50,
                 stops: 1,
-                hasReturn: isRoundTrip
+                hasReturn: isRoundTrip,
+                priceMultiplier: priceMultiplier
             ),
             createMockFlight(
                 from: from, to: to,
                 departureTime: "16:45", arrivalTime: "18:20",
                 carrier: "BA", number: "847",
                 duration: "PT1H35M",
-                price: 145.00,
+                basePrice: 145.00,
                 stops: 0,
-                hasReturn: isRoundTrip
+                hasReturn: isRoundTrip,
+                priceMultiplier: priceMultiplier
             ),
             createMockFlight(
                 from: from, to: to,
                 departureTime: "19:30", arrivalTime: "22:45",
                 carrier: "LH", number: "1234",
                 duration: "PT3H15M",
-                price: 120.00,
+                basePrice: 120.00,
                 stops: 1,
-                hasReturn: isRoundTrip
+                hasReturn: isRoundTrip,
+                priceMultiplier: priceMultiplier
             ),
             createMockFlight(
                 from: from, to: to,
                 departureTime: "06:00", arrivalTime: "08:15",
                 carrier: "AF", number: "5678",
                 duration: "PT2H15M",
-                price: 99.99,
+                basePrice: 99.99,
                 stops: 0,
-                hasReturn: isRoundTrip
+                hasReturn: isRoundTrip,
+                priceMultiplier: priceMultiplier
             ),
         ]
         
         return flights
+    }
+    
+    // MARK: - Price Multiplier based on Travel Class
+    
+    private static func getPriceMultiplier(for travelClass: TravelClass) -> Double {
+        switch travelClass {
+        case .economy:
+            return 1.0
+        case .premiumEconomy:
+            return 1.5
+        case .business:
+            return 3.0
+        case .first:
+            return 5.0
+        }
     }
     
     // MARK: - Create Single Mock Flight
@@ -73,10 +95,13 @@ struct MockFlightData {
         carrier: String,
         number: String,
         duration: String,
-        price: Double,
+        basePrice: Double,
         stops: Int,
-        hasReturn: Bool
+        hasReturn: Bool,
+        priceMultiplier: Double
     ) -> SimpleFlight {
+        
+        let finalPrice = basePrice * priceMultiplier
         
         let departureDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
         let returnDate = Calendar.current.date(byAdding: .day, value: 14, to: Date()) ?? Date()
@@ -175,7 +200,7 @@ struct MockFlightData {
         return SimpleFlight(
             id: UUID().uuidString,
             price: FlightPrice(
-                total: String(format: "%.2f", price),
+                total: String(format: "%.2f", finalPrice),
                 currency: "EUR"
             ),
             itineraries: itineraries

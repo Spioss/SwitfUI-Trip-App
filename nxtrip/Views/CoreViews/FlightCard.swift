@@ -9,17 +9,25 @@ import SwiftUI
 
 struct FlightCard: View {
     let flight: SimpleFlight
+    let numberOfTickets: Int
     @EnvironmentObject var viewModel: FlightViewModel
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header with prie
+            // Header with price
             HStack {
-                Text(viewModel.formatPrice(flight.totalPrice, currency: flight.currency))
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.purple)
-                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(viewModel.formatPrice(flight.totalPrice, currency: flight.currency, numberOfTickets: numberOfTickets))
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.purple)
+                    
+                    if numberOfTickets > 1 {
+                        Text("\(viewModel.formatPrice(flight.totalPrice, currency: flight.currency, numberOfTickets: 1)) × \(numberOfTickets)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
                 
                 Spacer()
                 

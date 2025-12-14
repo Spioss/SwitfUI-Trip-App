@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 // MARK: - Search Request/Response
 
@@ -14,8 +15,55 @@ struct FlightSearchRequest {
     let to: String         // "LHR"
     let departureDate: String  // "2025-06-15"
     let returnDate: String?    // nil for direct
-    let adults: Int        // 1
-    let kids: Int
+    let numberOfTickets: Int   // 1-9
+    let travelClass: TravelClass // Economy, Business, First
+}
+
+// MARK: - Travel Class
+enum TravelClass: String, CaseIterable, Codable {
+    case economy = "Economy"
+    case premiumEconomy = "Premium Economy"
+    case business = "Business"
+    case first = "First Class"
+    
+    var apiCode: String {
+        switch self {
+        case .economy:
+            return "ECONOMY"
+        case .premiumEconomy:
+            return "PREMIUM_ECONOMY"
+        case .business:
+            return "BUSINESS"
+        case .first:
+            return "FIRST"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .economy:
+            return "chair.fill"
+        case .premiumEconomy:
+            return "chair.lounge.fill"
+        case .business:
+            return "briefcase.fill"
+        case .first:
+            return "star.fill"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .economy:
+            return .blue
+        case .premiumEconomy:
+            return .cyan
+        case .business:
+            return .purple
+        case .first:
+            return .orange
+        }
+    }
 }
 
 struct FlightSearchResponse: Codable {
@@ -34,6 +82,16 @@ struct SimpleFlight: Codable, Identifiable {
     var outbound: SimpleItinerary { itineraries[0] }
     var inbound: SimpleItinerary? { itineraries.count > 1 ? itineraries[1] : nil }
     var isRoundTrip: Bool { itineraries.count > 1 }
+    
+    // total price for more tickets
+    func totalPriceForTickets(_ numberOfTickets: Int) -> Double {
+        return price.totalAsDouble * Double(numberOfTickets)
+    }
+    
+    func formattedTotalPrice(numberOfTickets: Int) -> String {
+        let total = totalPriceForTickets(numberOfTickets)
+        return String(format: "%.2f %@", total, currency)
+    }
 }
 
 struct FlightPrice: Codable {

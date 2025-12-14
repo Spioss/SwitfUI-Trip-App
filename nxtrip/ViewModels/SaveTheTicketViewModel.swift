@@ -181,7 +181,7 @@ class SaveTheTicketViewModel: ObservableObject {
             
             // Update in myOffers
             if let index = myOffers.firstIndex(where: { $0.id == offerId }) {
-                var updatedOffer = myOffers[index]
+                let updatedOffer = myOffers[index]
                 // Create new offer with isActive = false
                 myOffers[index] = TicketOffer(
                     id: updatedOffer.id,
