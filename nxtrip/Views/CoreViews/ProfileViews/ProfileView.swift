@@ -14,6 +14,7 @@ struct ProfileView: View {
     @State private var showAddCardView = false
     @State private var selectedCard: SavedCreditCard?
     @State private var newFullName = ""
+    @State private var showReviewsView = false
     
     // Inline phone editing
     @State private var isEditingPhone = false
@@ -209,13 +210,18 @@ struct ProfileView: View {
                 
                 
                 Section("Reviews") {
-                    HStack {
-                        TextWithImage(imageName: "star.fill", title: "My Reviews", tintColor: .yellow)
-                        Spacer()
-                        Text("Coming Soon")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    Button {
+                        showReviewsView = true
+                    } label: {
+                        HStack {
+                            TextWithImage(imageName: "star.fill", title: "My Reviews", tintColor: .yellow)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
+                    .buttonStyle(.plain)
                 }
                 
                 Section("Account") {
@@ -248,6 +254,10 @@ struct ProfileView: View {
             }
             .sheet(item: $selectedCard) { card in
                 CardDetailView(card: card)
+                    .environmentObject(viewModel)
+            }
+            .sheet(isPresented: $showReviewsView) {
+                AirlineReviewsListView()
                     .environmentObject(viewModel)
             }
             .alert("Change Name", isPresented: $showRenameAlert) {

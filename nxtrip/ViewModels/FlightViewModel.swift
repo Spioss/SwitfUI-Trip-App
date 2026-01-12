@@ -20,7 +20,7 @@ class FlightViewModel: ObservableObject {
     @Published var fromAirport: SimpleAirport?
     @Published var toAirport: SimpleAirport?
     @Published var departureDate = Date()
-    @Published var returnDate = Date().addingTimeInterval(7*24*3600)
+    @Published var returnDate = Date()//.addingTimeInterval(7*24*3600)
     @Published var isRoundTrip = false
     @Published var numberOfTickets = 1
     @Published var travelClass: TravelClass = .economy
@@ -44,6 +44,18 @@ class FlightViewModel: ObservableObject {
         
         searchStatus = "Searching airports for: '\(keyword)'"
         
+        // Step 1: Try local popular airports first
+        let localResults = searchLocalAirports(keyword: keyword)
+        
+        if !localResults.isEmpty {
+            // Local hits
+            airports = localResults
+            searchStatus = "Found \(localResults.count) airport\(localResults.count == 1 ? "" : "s")"
+            errorMessage = ""
+            return
+        }
+        
+        // Step 2: No local hits, try Amadeus API
         do {
             let foundAirports = try await service.searchAirports(keyword: keyword)
             airports = foundAirports
@@ -60,6 +72,81 @@ class FlightViewModel: ObservableObject {
             searchStatus = "Airport search failed"
             errorMessage = "Error finding airports: \(error.localizedDescription)"
             airports = []
+        }
+    }
+    
+    // MARK: - Local Airport Search (Popular Airports)
+    
+    private func searchLocalAirports(keyword: String) -> [SimpleAirport] {
+        let search = keyword.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // All popular airports we know about
+        let allAirports: [(code: String, name: String, city: String, country: String)] = [
+            ("BTS", "M. R. Štefánik Airport", "Bratislava", "Slovakia"),
+            ("VIE", "Vienna International Airport", "Vienna", "Austria"),
+            ("PRG", "Václav Havel Airport Prague", "Prague", "Czech Republic"),
+            ("LHR", "London Heathrow Airport", "London", "United Kingdom"),
+            ("LGW", "London Gatwick Airport", "London", "United Kingdom"),
+            ("STN", "London Stansted Airport", "London", "United Kingdom"),
+            ("CDG", "Charles de Gaulle Airport", "Paris", "France"),
+            ("ORY", "Paris Orly Airport", "Paris", "France"),
+            ("FRA", "Frankfurt Airport", "Frankfurt", "Germany"),
+            ("MUC", "Munich Airport", "Munich", "Germany"),
+            ("BER", "Berlin Brandenburg Airport", "Berlin", "Germany"),
+            ("FCO", "Leonardo da Vinci Airport", "Rome", "Italy"),
+            ("MXP", "Milan Malpensa Airport", "Milan", "Italy"),
+            ("MAD", "Adolfo Suárez Madrid-Barajas Airport", "Madrid", "Spain"),
+            ("BCN", "Barcelona-El Prat Airport", "Barcelona", "Spain"),
+            ("AMS", "Amsterdam Airport Schiphol", "Amsterdam", "Netherlands"),
+            ("DUB", "Dublin Airport", "Dublin", "Ireland"),
+            ("CPH", "Copenhagen Airport", "Copenhagen", "Denmark"),
+            ("ARN", "Stockholm Arlanda Airport", "Stockholm", "Sweden"),
+            ("OSL", "Oslo Airport, Gardermoen", "Oslo", "Norway"),
+            ("HEL", "Helsinki-Vantaa Airport", "Helsinki", "Finland"),
+            ("ZRH", "Zurich Airport", "Zurich", "Switzerland"),
+            ("WAW", "Warsaw Chopin Airport", "Warsaw", "Poland"),
+            ("BUD", "Budapest Ferenc Liszt International Airport", "Budapest", "Hungary"),
+            ("IST", "Istanbul Airport", "Istanbul", "Turkey"),
+            ("ATH", "Athens International Airport", "Athens", "Greece"),
+            ("LIS", "Lisbon Portela Airport", "Lisbon", "Portugal"),
+            ("DXB", "Dubai International Airport", "Dubai", "United Arab Emirates"),
+            ("JFK", "John F. Kennedy International Airport", "New York", "United States"),
+            ("LAX", "Los Angeles International Airport", "Los Angeles", "United States")
+        ]
+        
+        // Filter by code, city, or name (case-insensitive)
+        let matches = allAirports.filter { airport in
+            airport.code.lowercased().contains(search) ||
+            airport.city.lowercased().contains(search) ||
+            airport.name.lowercased().contains(search)
+        }
+        
+        // Sort by relevance: exact code match first, then city starts with, then others
+        let sorted = matches.sorted { a, b in
+            let aCodeMatch = a.code.lowercased() == search
+            let bCodeMatch = b.code.lowercased() == search
+            if aCodeMatch && !bCodeMatch { return true }
+            if !aCodeMatch && bCodeMatch { return false }
+            
+            let aCityStarts = a.city.lowercased().hasPrefix(search)
+            let bCityStarts = b.city.lowercased().hasPrefix(search)
+            if aCityStarts && !bCityStarts { return true }
+            if !aCityStarts && bCityStarts { return false }
+            
+            return a.city < b.city
+        }
+        
+        // Convert to SimpleAirport
+        return sorted.map { airport in
+            SimpleAirport(
+                id: airport.code,
+                name: airport.name,
+                iataCode: airport.code,
+                address: AirportAddress(
+                    cityName: airport.city,
+                    countryName: airport.country
+                )
+            )
         }
     }
     

@@ -63,8 +63,9 @@ class SaveTheTicketViewModel: ObservableObject {
         print("🔍 Fetching offers for user: \(userId)")
         
         do {
+            // NOTE: Firestore field is `sellerUid` (see TicketOffer.CodingKeys)
             let querySnapshot = try await db.collection("ticketOffers")
-                .whereField("sellerId", isEqualTo: userId)
+                .whereField("sellerUid", isEqualTo: userId)
                 .order(by: "createdAt", descending: true)
                 .getDocuments()
             
@@ -142,8 +143,9 @@ class SaveTheTicketViewModel: ObservableObject {
             
             print("✅ Offer created successfully: \(offer.route) on \(offer.date)")
             
-            // Refresh offers
+            // Refresh offers lists
             await fetchAllOffers()
+            await fetchMyOffers(userId: userId)
             
         } catch {
             errorMessage = "Failed to create offer: \(error.localizedDescription)"
